@@ -21,7 +21,7 @@ export type HeaderProps = {
 const Header = ({alternateLink, backButtonURL, onBackButtonClick}: HeaderProps) => {
     const {EnableCustomBrand, SiteName} = useSelector(getConfig);
 
-    const ariaLabel = EnableCustomBrand === 'true' && SiteName ? SiteName : 'Mattermost';
+    const ariaLabel = EnableCustomBrand === 'true' && SiteName ? SiteName : 'RemoTalk';
 
     return (
         <div className='hfroute-header'>
@@ -31,7 +31,7 @@ const Header = ({alternateLink, backButtonURL, onBackButtonClick}: HeaderProps) 
                     to='/'
                     aria-label={ariaLabel}
                 >
-                    {EnableCustomBrand === 'true' || SiteName !== 'Mattermost' ? SiteName : <Logo/>}
+                    {EnableCustomBrand === 'true' || SiteName !== 'RemoTalk' ? SiteName : <Logo/>}
                 </Link>
                 {alternateLink}
             </div>

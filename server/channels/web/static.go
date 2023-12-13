@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/klauspost/compress/gzhttp"
 
 	"github.com/mattermost/mattermost/server/public/model"
@@ -47,6 +48,7 @@ func (w *Web) InitStatic() {
 		w.MainRouter.PathPrefix("/static/").Handler(staticHandler)
 		w.MainRouter.Handle("/robots.txt", http.HandlerFunc(robotsHandler))
 		w.MainRouter.Handle("/unsupported_browser.js", http.HandlerFunc(unsupportedBrowserScriptHandler))
+		w.MainRouter.Handle("/{sw_js:.*sw\\.js$}", http.HandlerFunc(SWScriptHandler))
 		w.MainRouter.Handle("/{anything:.*}", w.NewStaticHandler(root)).Methods("GET")
 
 		// When a subpath is defined, it's necessary to handle redirects without a
@@ -146,6 +148,20 @@ func unsupportedBrowserScriptHandler(w http.ResponseWriter, r *http.Request) {
 
 	templatesDir, _ := templates.GetTemplateDirectory()
 	http.ServeFile(w, r, filepath.Join(templatesDir, "unsupported_browser.js"))
+}
+
+func SWScriptHandler(w http.ResponseWriter, r *http.Request) {
+	if strings.HasSuffix(r.URL.Path, "/") {
+		http.NotFound(w, r)
+		return
+	}
+	params := mux.Vars(r)
+	if val, ok := params["sw_js"]; ok {
+		templatesDir, _ := templates.GetTemplateDirectory()
+		http.ServeFile(w, r, filepath.Join(templatesDir, val))
+		return
+	}
+	http.NotFound(w, r)
 }
 
 func getOpenGraphMetaTags(c *Context) string {

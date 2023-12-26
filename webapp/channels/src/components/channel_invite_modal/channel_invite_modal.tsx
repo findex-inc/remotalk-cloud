@@ -6,6 +6,7 @@ import React from 'react';
 import {Modal} from 'react-bootstrap';
 import type {IntlShape} from 'react-intl';
 import {injectIntl, FormattedMessage} from 'react-intl';
+import ReactSelect from 'react-select'; // For RemoTalk plugin
 import styled from 'styled-components';
 
 import type {Channel} from '@mattermost/types/channels';
@@ -89,6 +90,11 @@ type State = {
     saving: boolean;
     loadingUsers: boolean;
     inviteError?: string;
+
+    // For RemoTalk plugin
+    hospitals: Array<{value: number; label: string}>;
+    departments: Array<{value: number; label: string}>;
+    professions: Array<{value: number; label: string}>;
 }
 
 const UsernameSpan = styled.span`
@@ -121,6 +127,11 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
             saving: false,
             loadingUsers: true,
             groupAndUserOptions: [],
+
+            // For RemoTalk plugin
+            hospitals: [],
+            departments: [],
+            professions: [],
         } as State;
     }
 
@@ -179,7 +190,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         this.setState({usersNotInTeam: [...usersNotInTeam], guestsNotInTeam: []});
     };
 
-    public componentDidMount(): void {
+    public async componentDidMount(): Promise<void> {
         this.props.actions.getProfilesNotInChannel(this.props.channel.team_id, this.props.channel.id, this.props.channel.group_constrained, 0).then(() => {
             this.setUsersLoadingState(false);
         });
@@ -187,6 +198,9 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         this.props.actions.getTeamStats(this.props.channel.team_id);
         this.props.actions.loadStatusesForProfilesList(this.props.profilesNotInCurrentChannel);
         this.props.actions.loadStatusesForProfilesList(this.props.profilesInCurrentChannel);
+
+        // For RemoTalk plugin
+        await this.loadPulldownOptions();
     }
 
     public async componentDidUpdate(prevProps: Props, prevState: State) {
@@ -408,14 +422,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                                 {displayName}
                                 {option.is_bot && <BotTag/>}
                                 {isGuest(option.roles) && <GuestTag className='popoverlist'/>}
-                                {displayName === option.username ?
-                                    null :
-                                    <UsernameSpan
-                                        className='ml-2 light'
-                                    >
-                                        {'@'}{option.username}
-                                    </UsernameSpan>
-                                }
+                                {displayName === option.username ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
                                 <UserMappingSpan
                                     className='light'
                                 >
@@ -445,6 +452,35 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                 onMouseMove={onMouseMove}
                 selectedItemRef={this.selectedItemRef}
             />
+        );
+    };
+
+    // For RemoTalk plugin
+    private loadPulldownOptions = async () => {
+        const [hospitals, departments, professions] = await Promise.all([
+            Client4.getHospitals().then((res) => res.map((x) => ({value: x.id, label: x.short_name ? x.short_name : x.name}))),
+            Client4.getDepartments().then((res) => res.map((x) => ({value: x.id, label: x.short_name ? x.short_name : x.name}))),
+            Client4.getProfessions().then((res) => res.map((x) => ({value: x.id, label: x.name}))),
+        ]);
+        this.setState({
+            hospitals: [{value: 0, label: localizeMessage('remotalk.channel_invite.hospital.empty', 'Hospital - empty')}].concat(hospitals),
+            departments: [{value: 0, label: localizeMessage('remotalk.channel_invite.department.empty', 'Department - empty')}].concat(departments),
+            professions: [{value: 0, label: localizeMessage('remotalk.channel_invite.profession.empty', 'Profession - empty')}].concat(professions),
+        });
+    };
+
+    // For RemoTalk plugin
+    private renderFilter = (options: Array<{value: number; label: string}>) => {
+        if (options.length < 3) {
+            return null;
+        }
+        return (
+            <div style={{padding: '0.5rem 2.4rem'}}>
+                <ReactSelect
+                    options={options}
+                    defaultValue={options[0]}
+                />
+            </div>
         );
     };
 
@@ -535,6 +571,13 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
             </InviteModalLink>
         );
 
+        // For RemoTalk plugin
+        const filters = [
+            this.state.hospitals,
+            this.state.departments,
+            this.state.professions,
+        ].map((l) => this.renderFilter(l)).filter((f) => Boolean(f));
+
         return (
             <Modal
                 id='addUsersToChannelModal'
@@ -567,6 +610,8 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                     className='overflow--visible'
                 >
                     {inviteError}
+                    {/* For RemoTalk plugin */}
+                    {filters.length && <div>{filters}</div>}
                     <div className='channel-invite__content'>
                         {content}
                         <TeamWarningBanner

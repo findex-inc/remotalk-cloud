@@ -4280,21 +4280,21 @@ export default class Client4 {
 
     // For RemoTalk plugin
     getHospitals = () => {
-        return this.doFetch<{id: number; name: string; short_name: string}>(
+        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
             `${this.getRemoTalkV1Route()}/hospitals`, {method: 'get'}
         );
     }
 
     // For RemoTalk plugin
     getDepartments = () => {
-        return this.doFetch<{id: number; name: string; short_name: string}>(
+        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
             `${this.getRemoTalkV1Route()}/departments`, {method: 'get'}
         );
     }
 
     // For RemoTalk plugin
     getProfessions = () => {
-        return this.doFetch<{id: number; name: string;}>(
+        return this.doFetch<Array<{id: number; name: string;}>>(
             `${this.getRemoTalkV1Route()}/professions`, {method: 'get'}
         );
     }

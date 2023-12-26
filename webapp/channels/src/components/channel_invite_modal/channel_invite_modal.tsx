@@ -66,6 +66,7 @@ export type Props = {
     emailInvitationsEnabled?: boolean;
     groups: Group[];
     isGroupsEnabled: boolean;
+    remotalkPluginEnabled: boolean;
     actions: {
         addUsersToChannel: (channelId: string, userIds: string[]) => Promise<ActionResult>;
         getProfilesNotInChannel: (teamId: string, channelId: string, groupConstrained: boolean, page: number, perPage?: number) => Promise<ActionResult>;
@@ -199,7 +200,9 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
         this.props.actions.loadStatusesForProfilesList(this.props.profilesInCurrentChannel);
 
         // For RemoTalk plugin
-        await this.loadPulldownOptions();
+        if (this.props.remotalkPluginEnabled) {
+            await this.loadPulldownOptions();
+        }
     }
 
     public async componentDidUpdate(prevProps: Props, prevState: State) {
@@ -609,7 +612,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                     </div>
                     {inviteError}
                     {/* For RemoTalk plugin */}
-                    {filters.length && <div>{filters}</div>}
+                    {filters.length ? <div>{filters}</div> : null}
                     <div className='channel-invite__content'>
                         {content}
                         <TeamWarningBanner

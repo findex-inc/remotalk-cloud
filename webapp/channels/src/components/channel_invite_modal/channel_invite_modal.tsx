@@ -5,6 +5,7 @@ import {isEqual} from 'lodash';
 import React from 'react';
 import {Modal} from 'react-bootstrap';
 import {FormattedMessage} from 'react-intl';
+import type {ValueType} from 'react-select';
 import ReactSelect from 'react-select'; // For RemoTalk plugin
 import styled from 'styled-components';
 
@@ -36,6 +37,11 @@ import TeamWarningBanner from './team_warning_banner';
 const USERS_PER_PAGE = 50;
 const USERS_FROM_DMS = 10;
 const MAX_USERS = 25;
+
+// For RemoTalk plugin
+const FILTER_KEYS = ['hospital_id', 'department_id', 'profession_id'] as const;
+type FilterKey = typeof FILTER_KEYS[number];
+type FilterOption = {value: number; label: string};
 
 type UserProfileValue = Value & UserProfile;
 
@@ -91,9 +97,11 @@ type State = {
     inviteError?: string;
 
     // For RemoTalk plugin
-    hospitals: Array<{value: number; label: string}>;
-    departments: Array<{value: number; label: string}>;
-    professions: Array<{value: number; label: string}>;
+    hospitals: FilterOption[];
+    departments: FilterOption[];
+    professions: FilterOption[];
+    filterParams: {[key in FilterKey]?: number};
+    filteredUserIds: string[];
 }
 
 const UsernameSpan = styled.span`
@@ -131,6 +139,8 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             hospitals: [],
             departments: [],
             professions: [],
+            filterParams: {},
+            filteredUserIds: [],
         } as State;
     }
 
@@ -464,22 +474,54 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             Client4.getProfessions().then((res) => res.map((x) => ({value: x.id, label: x.name}))),
         ]);
         this.setState({
-            hospitals: [{value: 0, label: localizeMessage('remotalk.channel_invite.hospital.empty', 'Hospital - empty')}].concat(hospitals),
-            departments: [{value: 0, label: localizeMessage('remotalk.channel_invite.department.empty', 'Department - empty')}].concat(departments),
-            professions: [{value: 0, label: localizeMessage('remotalk.channel_invite.profession.empty', 'Profession - empty')}].concat(professions),
+            hospitals: [{
+                value: 0,
+                label: localizeMessage('remotalk.channel_invite.hospital.empty', 'Hospital - empty'),
+            }].concat(hospitals),
+            departments: [{
+                value: 0,
+                label: localizeMessage('remotalk.channel_invite.department.empty', 'Department - empty'),
+            }].concat(departments),
+            professions: [{
+                value: 0,
+                label: localizeMessage('remotalk.channel_invite.profession.empty', 'Profession - empty'),
+            }].concat(professions),
         });
     };
 
     // For RemoTalk plugin
-    private renderFilter = (options: Array<{value: number; label: string}>) => {
+    private onFilterChange = async (val: ValueType<FilterOption>, key: FilterKey) => {
+        const id = val && 'value' in val ? val.value : undefined;
+        const params = {...this.state.filterParams, [key]: id};
+        let filtered: string[] = [];
+        if (Object.values(params).some((x) => Boolean(x))) {
+            filtered = await Client4.searchFilteredUserIds(params);
+        }
+        this.setState({
+            filterParams: params,
+            filteredUserIds: filtered,
+        });
+    };
+
+    // For RemoTalk plugin
+    private renderFilter = (options: FilterOption[], params: {[key in FilterKey]?: number}, key: FilterKey) => {
         if (options.length < 3) {
             return null;
         }
+        const found = options.find((x) => x.value === params[key]);
         return (
-            <div style={{padding: '0.5rem 2.4rem'}}>
+            <div
+                style={{padding: '0.5rem 2.4rem'}}
+                key={key}
+            >
                 <ReactSelect
+                    value={found}
                     options={options}
-                    defaultValue={options[0]}
+                    onChange={(val) => this.onFilterChange(val, key)}
+                    styles={{
+                        menuPortal: (provided) => ({...provided, zIndex: 9999}),
+                        menu: (provided) => ({...provided, zIndex: 9999}),
+                    }}
                 />
             </div>
         );
@@ -533,10 +575,12 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             </div>
         );
 
+        const filteredUserList = this.state.groupAndUserOptions.
+            filter((x) => !this.state.filteredUserIds.length || this.state.filteredUserIds.includes(x.id));
         const content = (
             <MultiSelect
                 key='addUsersToChannelKey'
-                options={this.state.groupAndUserOptions}
+                options={filteredUserList}
                 optionRenderer={this.renderOption}
                 selectedItemRef={this.selectedItemRef}
                 values={this.state.selectedUsers}
@@ -576,7 +620,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             this.state.hospitals,
             this.state.departments,
             this.state.professions,
-        ].map((l) => this.renderFilter(l)).filter((f) => Boolean(f));
+        ].map((o, i) => this.renderFilter(o, this.state.filterParams, FILTER_KEYS[i])).filter((f) => Boolean(f));
 
         return (
             <Modal

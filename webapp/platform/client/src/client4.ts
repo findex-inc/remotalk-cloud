@@ -4300,14 +4300,10 @@ export default class Client4 {
     }
 
     // For RemoTalk plugin
-    searchFilteredUsers = (hospId: number, deptId: number, profId: number) => {
+    searchFilteredUserIds = (params: {hospital_id?: number, department_id?: number, profession_id?: number}) => {
         return this.doFetch<string[]>(
             `${this.getRemoTalkV1Route()}/staffs/search`,
-            {method: 'post', body: JSON.stringify({
-                hospital_id: hospId,
-                department_id: deptId,
-                profession_id: profId,
-            })}
+            {method: 'post', body: JSON.stringify(params)}
         )
     }
 }

@@ -43,6 +43,12 @@ const MAX_USERS = 25;
 const FILTER_KEYS = ['hospital_id', 'department_id', 'profession_id'] as const;
 type FilterKey = typeof FILTER_KEYS[number];
 type FilterOption = {value: number; label: string};
+type StaffSummary = {
+    user_id: string;
+    hospital?: string;
+    department?: string;
+    profession?: string;
+};
 
 type UserProfileValue = Value & UserProfile;
 
@@ -103,6 +109,7 @@ type State = {
     professions: FilterOption[];
     filterParams: {[key in FilterKey]?: number};
     filteredUserIds: string[];
+    staffSummaries: {[key: string]: StaffSummary};
 }
 
 const UsernameSpan = styled.span`
@@ -142,6 +149,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             professions: [],
             filterParams: {},
             filteredUserIds: [],
+            staffSummaries: {},
         } as State;
     }
 
@@ -200,7 +208,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
         this.setState({usersNotInTeam: [...usersNotInTeam], guestsNotInTeam: []});
     };
 
-    public async componentDidMount(): Promise<void> {
+    public componentDidMount(): void {
         this.props.actions.getProfilesNotInChannel(this.props.channel.team_id, this.props.channel.id, this.props.channel.group_constrained, 0).then(() => {
             this.setUsersLoadingState(false);
         });
@@ -211,7 +219,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
 
         // For RemoTalk plugin
         if (this.props.remotalkPluginEnabled) {
-            await this.loadPulldownOptions();
+            this.loadPulldownOptions();
         }
     }
 
@@ -232,6 +240,9 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             if (!isEqual(values, this.state.groupAndUserOptions)) {
                 if (userIds.length > 0) {
                     this.props.actions.getTeamMembersByIds(this.props.channel.team_id, userIds);
+
+                    // For RemoTalk plugin
+                    this.loadStaffSummaries(userIds);
                 }
                 this.setState({groupAndUserOptions: values});
             }
@@ -400,6 +411,23 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
         }) as UserProfileValue[];
     };
 
+    // For RemoTalk plugin
+    private getStaffSummaryText = (userId: string) => {
+        const summary = this.state.staffSummaries[userId];
+        if (!summary) {
+            return '';
+        }
+        const infoToShow = [
+            summary.hospital,
+            summary.department,
+            summary.profession,
+        ].filter((x) => Boolean(x));
+        if (infoToShow.length === 0) {
+            return '';
+        }
+        return ` (${infoToShow.join(' / ')}) `;
+    };
+
     renderOption = (option: UserProfileValue | GroupValue, isSelected: boolean, onAdd: (option: UserProfileValue | GroupValue) => void, onMouseMove: (option: UserProfileValue | GroupValue) => void) => {
         let rowSelected = '';
         if (isSelected) {
@@ -414,6 +442,9 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                 userMapping[ProfilesInGroup[i]] = 'Already in channel';
             }
             const displayName = displayUsername(option, this.props.teammateNameDisplaySetting);
+
+            // For RemoTalk plugin
+            const staffSummary = this.getStaffSummaryText(option.id);
             return (
                 <div
                     key={option.id}
@@ -432,6 +463,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                         <div className='more-modal__name'>
                             <span>
                                 {displayName}
+                                {staffSummary}
                                 {option.is_bot && <BotTag/>}
                                 {isGuest(option.roles) && <GuestTag className='popoverlist'/>}
                                 {displayName === option.username ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
@@ -485,6 +517,19 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                 value: 0,
                 label: localizeMessage('remotalk.channel_invite.profession.empty', 'Profession - empty'),
             }].concat(professions),
+        });
+    };
+
+    // For RemoTalk plugin
+    private loadStaffSummaries = async (userIds: string[]) => {
+        const current = this.state.staffSummaries;
+        const idsToFetch = userIds.filter((x) => Boolean(!current[x]));
+        if (idsToFetch.length === 0) {
+            return;
+        }
+        const result = await Client4.getStaffSummaries(idsToFetch);
+        this.setState({
+            staffSummaries: {...current, ...result},
         });
     };
 
@@ -586,6 +631,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
             </div>
         );
 
+        // For RemoTalk plugin
         const filteredUserList = this.state.groupAndUserOptions.
             filter((x) => !this.state.filteredUserIds.length || this.state.filteredUserIds.includes(x.id));
         const content = (

@@ -4306,6 +4306,21 @@ export default class Client4 {
             {method: 'post', body: JSON.stringify(params)}
         )
     }
+
+    // For RemoTalk plugin
+    getStaffSummaries = (userIds: string[]) => {
+        return this.doFetch<{
+            [key: string]: {
+                user_id: string;
+                hospital?: string;
+                department?: string;
+                profession?: string;
+            };
+        }>(`${this.getRemoTalkV1Route()}/staffs/summary`, {
+            method: "post",
+            body: JSON.stringify(userIds),
+        });
+    }
 }
 
 export function parseAndMergeNestedHeaders(originalHeaders: any) {

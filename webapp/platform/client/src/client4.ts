@@ -269,6 +269,11 @@ export default class Client4 {
         return `${this.url}/plugins/com.mattermost.apps`;
     }
 
+    // For RemoTalk plugin
+    getRemoTalkV1Route() {
+        return `${this.url}/plugins/jp.co.findex.remotalk-plugin/api/v1`
+    }
+
     getUsersRoute() {
         return `${this.getBaseRoute()}/users`;
     }
@@ -4271,6 +4276,50 @@ export default class Client4 {
             `${this.getChannelRoute(channelId)}/convert_to_channel?team_id=${teamId}`,
             {method: 'post', body: JSON.stringify(body)},
         )
+    }
+
+    // For RemoTalk plugin
+    getHospitals = () => {
+        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
+            `${this.getRemoTalkV1Route()}/hospitals`, {method: 'get'}
+        );
+    }
+
+    // For RemoTalk plugin
+    getDepartments = () => {
+        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
+            `${this.getRemoTalkV1Route()}/departments`, {method: 'get'}
+        );
+    }
+
+    // For RemoTalk plugin
+    getProfessions = () => {
+        return this.doFetch<Array<{id: number; name: string;}>>(
+            `${this.getRemoTalkV1Route()}/professions`, {method: 'get'}
+        );
+    }
+
+    // For RemoTalk plugin
+    searchFilteredUserIds = (params: {hospital_id?: number, department_id?: number, profession_id?: number}) => {
+        return this.doFetch<string[]>(
+            `${this.getRemoTalkV1Route()}/staffs/search`,
+            {method: 'post', body: JSON.stringify(params)}
+        )
+    }
+
+    // For RemoTalk plugin
+    getStaffSummaries = (userIds: string[]) => {
+        return this.doFetch<{
+            [key: string]: {
+                user_id: string;
+                hospital?: string;
+                department?: string;
+                profession?: string;
+            };
+        }>(`${this.getRemoTalkV1Route()}/staffs/summary`, {
+            method: "post",
+            body: JSON.stringify(userIds),
+        });
     }
 }
 

@@ -85,6 +85,9 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
         const teammateNameDisplaySetting = getTeammateNameDisplaySetting(state);
         const groups = getAllAssociatedGroupsForReference(state, true);
 
+        // For RemoTalk plugin
+        const remotalkPluginEnabled = Boolean(state.plugins.plugins['jp.co.findex.remotalk-plugin']);
+
         return {
             profilesNotInCurrentChannel,
             profilesInCurrentChannel,
@@ -97,6 +100,7 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
             emailInvitationsEnabled,
             groups,
             isGroupsEnabled,
+            remotalkPluginEnabled,
         };
     };
 }

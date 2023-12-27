@@ -241,7 +241,9 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                     this.props.actions.getTeamMembersByIds(this.props.channel.team_id, userIds);
 
                     // For RemoTalk plugin
-                    this.loadStaffSummaries(userIds);
+                    if (this.props.remotalkPluginEnabled) {
+                        this.loadStaffSummaries(userIds);
+                    }
                 }
                 this.setState({groupAndUserOptions: values});
             }

@@ -560,7 +560,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         const found = options.find((x) => x.value === params[key]);
         return (
             <div
-                style={{padding: '0.5rem 2.4rem'}}
+                style={{padding: '0.5rem 3.2rem'}}
                 key={key}
             >
                 <ReactSelect

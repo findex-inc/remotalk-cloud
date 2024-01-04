@@ -625,8 +625,11 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         );
 
         // For RemoTalk plugin
-        const filteredUserList = this.state.groupAndUserOptions.
-            filter((x) => !this.state.filteredUserIds.length || this.state.filteredUserIds.includes(x.id));
+        const filteredUserList = this.state.groupAndUserOptions.filter(
+            (x) =>
+                Object.values(this.state.filterParams).every((x) => !x) ||
+                this.state.filteredUserIds.includes(x.id),
+        );
         const content = (
             <MultiSelect
                 key='addUsersToChannelKey'

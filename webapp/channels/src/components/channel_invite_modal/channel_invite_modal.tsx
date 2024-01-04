@@ -560,7 +560,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         const found = options.find((x) => x.value === params[key]);
         return (
             <div
-                style={{padding: '0.5rem 2.4rem'}}
+                style={{padding: '0.5rem 3.2rem'}}
                 key={key}
             >
                 <ReactSelect
@@ -625,8 +625,11 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         );
 
         // For RemoTalk plugin
-        const filteredUserList = this.state.groupAndUserOptions.
-            filter((x) => !this.state.filteredUserIds.length || this.state.filteredUserIds.includes(x.id));
+        const filteredUserList = this.state.groupAndUserOptions.filter(
+            (x) =>
+                Object.values(this.state.filterParams).every((x) => !x) ||
+                this.state.filteredUserIds.includes(x.id),
+        );
         const content = (
             <MultiSelect
                 key='addUsersToChannelKey'

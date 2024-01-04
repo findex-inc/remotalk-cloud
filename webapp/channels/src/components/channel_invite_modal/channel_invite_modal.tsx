@@ -4,7 +4,8 @@
 import {isEqual} from 'lodash';
 import React from 'react';
 import {Modal} from 'react-bootstrap';
-import {FormattedMessage} from 'react-intl';
+import type {IntlShape} from 'react-intl';
+import {injectIntl, FormattedMessage} from 'react-intl';
 import type {ValueType} from 'react-select';
 import ReactSelect from 'react-select'; // For RemoTalk plugin
 import styled from 'styled-components';
@@ -58,6 +59,7 @@ export type Props = {
     profilesInCurrentChannel: UserProfile[];
     profilesNotInCurrentTeam: UserProfile[];
     profilesFromRecentDMs: UserProfile[];
+    intl: IntlShape;
     membersInTeam: RelationOneToOne<UserProfile, TeamMembership>;
     userStatuses: RelationOneToOne<UserProfile, string>;
     onExited: () => void;
@@ -120,7 +122,7 @@ const UserMappingSpan = styled.span`
     right: 20px;
 `;
 
-export default class ChannelInviteModal extends React.PureComponent<Props, State> {
+export class ChannelInviteModal extends React.PureComponent<Props, State> {
     private searchTimeoutId = 0;
     private selectedItemRef = React.createRef<HTMLDivElement>();
 
@@ -630,6 +632,7 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
                 key='addUsersToChannelKey'
                 options={filteredUserList}
                 optionRenderer={this.renderOption}
+                intl={this.props.intl}
                 selectedItemRef={this.selectedItemRef}
                 values={this.state.selectedUsers}
                 ariaLabelRenderer={this.renderAriaLabel}
@@ -718,3 +721,5 @@ export default class ChannelInviteModal extends React.PureComponent<Props, State
         );
     };
 }
+
+export default injectIntl(ChannelInviteModal);

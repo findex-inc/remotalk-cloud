@@ -81,7 +81,7 @@ export type Props = {
     isGroupsEnabled: boolean;
     remotalkPluginEnabled: boolean;
     actions: {
-        addUsersToChannel: (channelId: string, userIds: string[]) => Promise<ActionResult>;
+        addUsersToChannel: (channelId: string, userIds: string[]) => Promise<any>;
         getProfilesNotInChannel: (teamId: string, channelId: string, groupConstrained: boolean, page: number, perPage?: number) => Promise<ActionResult>;
         getProfilesInChannel: (channelId: string, page: number, perPage: number, sort: string, options: {active?: boolean}) => Promise<ActionResult>;
         getTeamStats: (teamId: string) => void;

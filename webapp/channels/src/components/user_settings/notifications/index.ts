@@ -35,6 +35,8 @@ const mapStateToProps = (state: GlobalState) => {
         isEnterpriseOrCloudOrSKUStarterFree: isEnterpriseOrCloudOrSKUStarterFree(license, subscriptionProduct, isEnterpriseReady),
         isEnterpriseReady,
 
+        // For RemoTalk plugin
+        sendEmailNotifications: config.SendEmailNotifications === 'true',
     };
 };
 

@@ -474,6 +474,11 @@ class NotificationsTab extends React.PureComponent<Props, State> {
     };
 
     createPushNotificationSection = () => {
+        // For RemoTalk plugin
+        if (!this.props.sendPushNotifications) {
+            return null;
+        }
+
         const active = this.props.activeSection === 'push';
         const inputs = [];
         let submit = null;
@@ -1342,20 +1347,23 @@ class NotificationsTab extends React.PureComponent<Props, State> {
                         isCallsRingingEnabled={this.props.isCallsRingingEnabled}
                     />
                     <div className='divider-light'/>
-                    <EmailNotificationSetting
-                        active={this.props.activeSection === 'email'}
-                        updateSection={this.handleUpdateSection}
-                        onSubmit={this.handleSubmit}
-                        onCancel={this.handleCancel}
-                        saving={this.state.isSaving}
-                        error={this.state.serverError}
-                        setParentState={this.setStateValue}
-                        areAllSectionsInactive={this.props.activeSection === ''}
-                        isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
-                        enableEmail={this.state.enableEmail === 'true'}
-                        onChange={this.handleEmailRadio}
-                        threads={this.state.emailThreads || ''}
-                    />
+                    { // For RemoTalk plugin
+                        this.props.sendEmailNotifications &&
+                        <EmailNotificationSetting
+                            active={this.props.activeSection === 'email'}
+                            updateSection={this.handleUpdateSection}
+                            onSubmit={this.handleSubmit}
+                            onCancel={this.handleCancel}
+                            saving={this.state.isSaving}
+                            error={this.state.serverError}
+                            setParentState={this.setStateValue}
+                            areAllSectionsInactive={this.props.activeSection === ''}
+                            isCollapsedThreadsEnabled={this.props.isCollapsedThreadsEnabled}
+                            enableEmail={this.state.enableEmail === 'true'}
+                            onChange={this.handleEmailRadio}
+                            threads={this.state.emailThreads || ''}
+                        />
+                    }
                     <div className='divider-light'/>
                     {pushNotificationSection}
                     <div className='divider-light'/>

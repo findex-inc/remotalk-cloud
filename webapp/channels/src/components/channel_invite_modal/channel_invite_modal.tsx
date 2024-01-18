@@ -19,7 +19,7 @@ import type {RelationOneToOne} from '@mattermost/types/utilities';
 import {Client4} from 'mattermost-redux/client';
 import type {ActionResult} from 'mattermost-redux/types/actions';
 import {filterGroupsMatchingTerm} from 'mattermost-redux/utils/group_utils';
-import {displayUsername, filterProfilesStartingWithTerm, isGuest} from 'mattermost-redux/utils/user_utils';
+import {displayUsername, filterProfilesMatchingWithTerm, isGuest} from 'mattermost-redux/utils/user_utils';
 
 import InvitationModal from 'components/invitation_modal';
 import MultiSelect from 'components/multiselect/multiselect';
@@ -263,11 +263,11 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     public getOptions = () => {
         const excludedAndNotInTeamUserIds = this.getExcludedUsers();
 
-        const filteredDmUsers = filterProfilesStartingWithTerm(this.props.profilesFromRecentDMs, this.state.term);
+        const filteredDmUsers = filterProfilesMatchingWithTerm(this.props.profilesFromRecentDMs, this.state.term);
         const dmUsers = this.filterOutDeletedAndExcludedAndNotInTeamUsers(filteredDmUsers, excludedAndNotInTeamUserIds).slice(0, USERS_FROM_DMS) as UserProfileValue[];
 
         let users: UserProfileValue[];
-        const filteredUsers: UserProfile[] = filterProfilesStartingWithTerm(this.props.profilesNotInCurrentChannel.concat(this.props.profilesInCurrentChannel), this.state.term);
+        const filteredUsers: UserProfile[] = filterProfilesMatchingWithTerm(this.props.profilesNotInCurrentChannel.concat(this.props.profilesInCurrentChannel), this.state.term);
         users = this.filterOutDeletedAndExcludedAndNotInTeamUsers(filteredUsers, excludedAndNotInTeamUserIds);
         if (this.props.includeUsers) {
             users = [...users, ...Object.values(this.props.includeUsers)];

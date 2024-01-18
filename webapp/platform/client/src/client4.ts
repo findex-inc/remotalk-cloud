@@ -4329,6 +4329,13 @@ export default class Client4 {
     }
 
     // For RemoTalk plugin
+    getRemoTalkPluginConfig = () => {
+        return this.doFetch<{[key: string]: any}>(
+            `${this.getRemoTalkV1Route()}/config`, {method: 'get'}
+        )
+    }
+
+    // For RemoTalk plugin
     getHospitals = () => {
         return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
             `${this.getRemoTalkV1Route()}/hospitals`, {method: 'get'}

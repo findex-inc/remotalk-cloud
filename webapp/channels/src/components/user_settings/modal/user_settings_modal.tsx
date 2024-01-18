@@ -83,6 +83,7 @@ export type Props = {
         sendVerificationEmail: (email: string) => Promise<ActionResult>;
     };
     pluginSettings: {[pluginId: string]: PluginConfiguration};
+    remotalkPluginEnabled: boolean;
 }
 
 type State = {
@@ -141,7 +142,9 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
         document.addEventListener('keydown', this.handleKeyDown);
 
         // For RemoTalk plugin
-        this.loadRemoTalkPluginConfig();
+        if (this.props.remotalkPluginEnabled) {
+            this.loadRemoTalkPluginConfig();
+        }
     }
 
     componentWillUnmount() {

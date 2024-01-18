@@ -21,11 +21,15 @@ function mapStateToProps(state: GlobalState) {
     const sendEmailNotifications = config.SendEmailNotifications === 'true';
     const requireEmailVerification = config.RequireEmailVerification === 'true';
 
+    // For RemoTalk plugin
+    const remotalkPluginEnabled = Boolean(state.plugins.plugins['jp.co.findex.remotalk-plugin']);
+
     return {
         currentUser: getCurrentUser(state),
         sendEmailNotifications,
         requireEmailVerification,
         pluginSettings: getPluginUserSettings(state),
+        remotalkPluginEnabled,
     };
 }
 

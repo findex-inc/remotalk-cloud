@@ -522,7 +522,7 @@ export function searchProfilesNotInCurrentChannel(state: GlobalState, term: stri
 }
 
 export function searchProfilesInCurrentTeam(state: GlobalState, term: string, skipCurrent = false): UserProfile[] {
-    const profiles = filterProfilesStartingWithTerm(getProfilesInCurrentTeam(state), term);
+    const profiles = filterProfilesMatchingWithTerm(getProfilesInCurrentTeam(state), term);
     if (skipCurrent) {
         removeCurrentUserFromList(profiles, getCurrentUserId(state));
     }

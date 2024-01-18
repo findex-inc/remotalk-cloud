@@ -5781,5 +5781,8 @@
   "workspace_limits.teams_limit_reached.view_upgrade_options": "アップグレードオプションを見る",
   "workspace_limits.upgrade": "{planName} のデータ制限を回避するためにアップグレードする",
   "workspace_limits.upgrade_reasons.free": "{planName} は、{messagesLimit} 件のメッセージ履歴、{storageLimit} のストレージに制限されています。 アイテムを削除して空き容量を確保したり、有料プランにアップグレードすることも可能です。",
-  "yourcomputer": "あなたのコンピューター"
+  "yourcomputer": "あなたのコンピューター",
+  "remotalk.channel_invite.department.select": "診療科を選択",
+  "remotalk.channel_invite.hospital.select": "医療機関を選択",
+  "remotalk.channel_invite.profession.select": "職種を選択"
 }

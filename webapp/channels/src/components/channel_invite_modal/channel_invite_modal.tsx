@@ -108,7 +108,7 @@ type State = {
     hospitals: FilterOption[];
     departments: FilterOption[];
     professions: FilterOption[];
-    filterParams: {[key in FilterKey]?: number};
+    filterParams: {[key in FilterKey]: number};
     filteredUserIds: string[];
     staffSummaries: {[key: string]: StaffSummary};
 }
@@ -148,7 +148,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
             hospitals: [],
             departments: [],
             professions: [],
-            filterParams: {},
+            filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
             filteredUserIds: [],
             staffSummaries: {},
         } as State;
@@ -512,15 +512,15 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         this.setState({
             hospitals: [{
                 value: 0,
-                label: localizeMessage('remotalk.channel_invite.hospital.empty', 'Hospital - empty'),
+                label: localizeMessage('remotalk.channel_invite.hospital.select', 'Select Hospital'),
             }].concat(hospitals),
             departments: [{
                 value: 0,
-                label: localizeMessage('remotalk.channel_invite.department.empty', 'Department - empty'),
+                label: localizeMessage('remotalk.channel_invite.department.select', 'Select Department'),
             }].concat(departments),
             professions: [{
                 value: 0,
-                label: localizeMessage('remotalk.channel_invite.profession.empty', 'Profession - empty'),
+                label: localizeMessage('remotalk.channel_invite.profession.select', 'Select Profession'),
             }].concat(professions),
         });
     };

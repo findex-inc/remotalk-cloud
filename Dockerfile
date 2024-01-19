@@ -37,7 +37,8 @@ RUN apt-get update \
 	wv \
 	poppler-utils \
 	tidy \
-	tzdata
+	tzdata \
+	postgresql-client
 
 COPY --from=server /go/src/server/dist/mattermost-team-linux-amd64.tar.gz /
 

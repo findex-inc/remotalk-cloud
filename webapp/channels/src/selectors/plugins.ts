@@ -108,3 +108,28 @@ export function showNewChannelWithBoardPulsatingDot(state: GlobalState): boolean
     const showPulsatingDot = pulsatingDotState !== '' && JSON.parse(pulsatingDotState)[Preferences.NEW_CHANNEL_WITH_BOARD_TOUR_SHOWED] === false;
     return showPulsatingDot;
 }
+
+// For RemoTalk plugin
+
+const remotalkPluginId = 'jp.co.findex.remotalk-plugin';
+
+export function isRemoTalkPluginEnabled(s: GlobalState) {
+    return Boolean(s.plugins.plugins[remotalkPluginId]);
+}
+
+export function getRemoTalkPluginState(s: any) {
+    return s[`plugins-${remotalkPluginId}`];
+}
+
+export const getRemoTalkPluginConfig = createSelector(
+    'getRemoTalkPluginConfig',
+    getRemoTalkPluginState,
+    (s) => s?.config,
+);
+
+export const securitySettingsInvisible = createSelector(
+    'securitySettingsInvisible',
+    isRemoTalkPluginEnabled,
+    getRemoTalkPluginConfig,
+    (enabled, config) => Boolean(enabled && config?.DisableManuallyChangeSecuritySettings),
+);

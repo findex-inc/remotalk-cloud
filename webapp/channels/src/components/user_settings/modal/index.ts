@@ -9,7 +9,7 @@ import {sendVerificationEmail} from 'mattermost-redux/actions/users';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 
-import {getPluginUserSettings} from 'selectors/plugins';
+import {getPluginUserSettings, securitySettingsInvisible} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -22,14 +22,14 @@ function mapStateToProps(state: GlobalState) {
     const requireEmailVerification = config.RequireEmailVerification === 'true';
 
     // For RemoTalk plugin
-    const remotalkPluginEnabled = Boolean(state.plugins.plugins['jp.co.findex.remotalk-plugin']);
+    const hideSecurity = securitySettingsInvisible(state);
 
     return {
         currentUser: getCurrentUser(state),
         sendEmailNotifications,
         requireEmailVerification,
         pluginSettings: getPluginUserSettings(state),
-        remotalkPluginEnabled,
+        hideSecurity,
     };
 }
 

@@ -44,6 +44,7 @@ import {selectPostFromRightHandSideSearchByPostId} from 'actions/views/rhs';
 import {setShowPreviewOnCreatePost} from 'actions/views/textbox';
 import {getEmojiMap} from 'selectors/emojis';
 import {getCurrentLocale} from 'selectors/i18n';
+import {canCreatePost} from 'selectors/plugins';
 import {makeGetChannelDraft, getIsRhsExpanded, getIsRhsOpen} from 'selectors/rhs';
 import {connectionErrorCount} from 'selectors/views/system';
 import {showPreviewOnCreatePost} from 'selectors/views/textbox';
@@ -77,7 +78,7 @@ function makeMapStateToProps() {
         const currentUserId = getCurrentUserId(state);
         const userIsOutOfOffice = getStatusForUserId(state, currentUserId) === UserStatuses.OUT_OF_OFFICE;
         const badConnection = connectionErrorCount(state) > 1;
-        const canPost = haveICurrentChannelPermission(state, Permissions.CREATE_POST);
+        const canPost = canCreatePost(state); // For RemoTalk plugin
         const useChannelMentions = haveICurrentChannelPermission(state, Permissions.USE_CHANNEL_MENTIONS);
         const isLDAPEnabled = license?.IsLicensed === 'true' && license?.LDAPGroups === 'true';
         const useCustomGroupMentions = isCustomGroupsEnabled(state) && haveICurrentChannelPermission(state, Permissions.USE_GROUP_MENTIONS);

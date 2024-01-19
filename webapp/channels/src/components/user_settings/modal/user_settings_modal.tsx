@@ -14,7 +14,6 @@ import {Provider} from 'react-redux';
 
 import type {UserProfile} from '@mattermost/types/users';
 
-import {Client4} from 'mattermost-redux/client';
 import type {ActionResult} from 'mattermost-redux/types/actions';
 
 import store from 'stores/redux_store';
@@ -83,7 +82,9 @@ export type Props = {
         sendVerificationEmail: (email: string) => Promise<ActionResult>;
     };
     pluginSettings: {[pluginId: string]: PluginConfiguration};
-    remotalkPluginEnabled: boolean;
+
+    // For RemoTalk plugin
+    hideSecurity: boolean;
 }
 
 type State = {
@@ -93,7 +94,6 @@ type State = {
     enforceFocus?: boolean;
     show: boolean;
     resendStatus: string;
-    hideSecurity: boolean;
 }
 
 class UserSettingsModal extends React.PureComponent<Props, State> {
@@ -112,7 +112,6 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             enforceFocus: true,
             show: true,
             resendStatus: '',
-            hideSecurity: false,
         };
 
         this.requireConfirm = false;
@@ -140,11 +139,6 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
 
     componentDidMount() {
         document.addEventListener('keydown', this.handleKeyDown);
-
-        // For RemoTalk plugin
-        if (this.props.remotalkPluginEnabled) {
-            this.loadRemoTalkPluginConfig();
-        }
     }
 
     componentWillUnmount() {
@@ -157,16 +151,6 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             el.scrollTop = 0;
         }
     }
-
-    // For RemoTalk plugin
-    loadRemoTalkPluginConfig = async () => {
-        try {
-            const config = await Client4.getRemoTalkPluginConfig();
-            if (typeof config.DisableManuallyChangeSecuritySettings === 'boolean') {
-                this.setState({hideSecurity: config.DisableManuallyChangeSecuritySettings});
-            }
-        } catch { /* empty */ }
-    };
 
     handleKeyDown = (e: KeyboardEvent) => {
         if (Keyboard.cmdOrCtrlPressed(e) && e.shiftKey && Keyboard.isKeyPressed(e, Constants.KeyCodes.A)) {
@@ -309,7 +293,7 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
             }));
         } else {
             tabs.push({name: 'profile', uiName: formatMessage(holders.profile), icon: 'icon icon-settings-outline', iconTitle: Utils.localizeMessage('user.settings.profile.icon', 'Profile Settings Icon')});
-            if (!this.state.hideSecurity) {
+            if (!this.props.hideSecurity) {
                 tabs.push({name: 'security', uiName: formatMessage(holders.security), icon: 'icon icon-lock-outline', iconTitle: Utils.localizeMessage('user.settings.security.icon', 'Security Settings Icon')});
             }
         }

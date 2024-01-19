@@ -166,3 +166,19 @@ export const canCreatePost = createSelector(
         return false;
     },
 );
+
+export const getUserProfileItemsToHide = createSelector(
+    'getUserProfileItemsToHide',
+    isRemoTalkPluginEnabled,
+    getRemoTalkPluginConfig,
+    (enabled, config) => {
+        if (!enabled || !config?.ProfileItemsToDisableManualChange) {
+            return [];
+        }
+        const str = config.ProfileItemsToDisableManualChange;
+        if (typeof str !== 'string') {
+            return [];
+        }
+        return str.split(',').map((x) => x.trim());
+    },
+);

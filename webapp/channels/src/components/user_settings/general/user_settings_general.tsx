@@ -121,6 +121,9 @@ export type Props = {
     ldapPositionAttributeSet?: boolean;
     samlPositionAttributeSet?: boolean;
     ldapPictureAttributeSet?: boolean;
+
+    // For RemoTalk plugin
+    itemsToHide: string[];
 }
 
 type State = {
@@ -1399,18 +1402,42 @@ export class UserSettingsGeneralTab extends React.Component<Props, State> {
                         />
                     </h3>
                     <div className='divider-dark first'/>
-                    {nameSection}
-                    <div className='divider-light'/>
-                    {usernameSection}
-                    <div className='divider-light'/>
-                    {nicknameSection}
-                    <div className='divider-light'/>
-                    {positionSection}
-                    <div className='divider-light'/>
-                    {emailSection}
-                    <div className='divider-light'/>
-                    {pictureSection}
-                    <div className='divider-dark'/>
+                    {this.props.itemsToHide.includes('name') ? null : (
+                        <>
+                            {nameSection}
+                            <div className='divider-light'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide.includes('username') ? null : (
+                        <>
+                            {usernameSection}
+                            <div className='divider-light'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide.includes('nickname') ? null : (
+                        <>
+                            {nicknameSection}
+                            <div className='divider-light'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide.includes('position') ? null : (
+                        <>
+                            {positionSection}
+                            <div className='divider-light'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide.includes('email') ? null : (
+                        <>
+                            {emailSection}
+                            <div className='divider-light'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide.includes('picture') ? null : (
+                        <>
+                            {pictureSection}
+                            <div className='divider-dark'/>
+                        </>
+                    )}
                 </div>
             </div>
         );

@@ -14,6 +14,7 @@ import {
 } from 'mattermost-redux/actions/users';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
+import {getUserProfileItemsToHide} from 'selectors/plugins';
 import {getIsMobileView} from 'selectors/views/browser';
 
 import type {GlobalState} from 'types/store';
@@ -35,6 +36,9 @@ function mapStateToProps(state: GlobalState) {
     const ldapPositionAttributeSet = config.LdapPositionAttributeSet === 'true';
     const ldapPictureAttributeSet = config.LdapPictureAttributeSet === 'true';
 
+    // For RemoTalk plugin
+    const itemsToHide = getUserProfileItemsToHide(state);
+
     return {
         isMobileView: getIsMobileView(state),
         requireEmailVerification,
@@ -48,6 +52,7 @@ function mapStateToProps(state: GlobalState) {
         samlPositionAttributeSet,
         ldapPositionAttributeSet,
         ldapPictureAttributeSet,
+        itemsToHide,
     };
 }
 

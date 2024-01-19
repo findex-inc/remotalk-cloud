@@ -123,16 +123,14 @@ async function respondWithCache(req) {
     }
 }
 
-self.addEventListener("install", (event) => {
-    const onInstall = async () => {
-        await deleteAllCaches();
-        await self.skipWaiting();
-    };
-    event.waitUntil(onInstall());
-});
+self.addEventListener("install", (event) => {});
 
 self.addEventListener("activate", (event) => {
-    event.waitUntil(self.clients.claim());
+    const onActivate = Promise.all([
+        deleteAllCaches(),
+        self.clients.claim(),
+    ]);
+    event.waitUntil(onActivate);
 });
 
 self.addEventListener("fetch", (event) => {

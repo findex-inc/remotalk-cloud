@@ -3,11 +3,17 @@
 
 import type {AppBinding} from '@mattermost/types/apps';
 
-import {Preferences} from 'mattermost-redux/constants';
+import {Preferences, Permissions} from 'mattermost-redux/constants';
 import {createSelector} from 'mattermost-redux/selectors/create_selector';
 import {appBarEnabled, getAppBarAppBindings} from 'mattermost-redux/selectors/entities/apps';
+import {getCurrentChannel} from 'mattermost-redux/selectors/entities/channels';
 import {get} from 'mattermost-redux/selectors/entities/preferences';
+import {haveICurrentChannelPermission} from 'mattermost-redux/selectors/entities/roles';
+import {getCurrentUserRoles} from 'mattermost-redux/selectors/entities/users';
 import {createShallowSelector} from 'mattermost-redux/utils/helpers';
+import {includesAnAdminRole, isChannelAdmin, isTeamAdmin} from 'mattermost-redux/utils/user_utils';
+
+import Constants from 'utils/constants';
 
 import type {GlobalState} from 'types/store';
 import type {FileDropdownPluginComponent, PluginComponent} from 'types/store/plugins';
@@ -132,4 +138,31 @@ export const securitySettingsInvisible = createSelector(
     isRemoTalkPluginEnabled,
     getRemoTalkPluginConfig,
     (enabled, config) => Boolean(enabled && config?.DisableManuallyChangeSecuritySettings),
+);
+
+export const postToTownSquareDisabled = createSelector(
+    'postToTownSquareDisabled',
+    isRemoTalkPluginEnabled,
+    getRemoTalkPluginConfig,
+    (enabled, config) => Boolean(enabled && config?.DisablePostToTownSquare),
+);
+
+export const canCreatePost = createSelector(
+    'canCreatePost',
+    (s: GlobalState) => haveICurrentChannelPermission(s, Permissions.CREATE_POST),
+    (s: GlobalState) => {
+        const roles = getCurrentUserRoles(s);
+        return includesAnAdminRole(roles) || isTeamAdmin(roles) || isChannelAdmin(roles);
+    },
+    (s: GlobalState) => getCurrentChannel(s)?.name === Constants.DEFAULT_CHANNEL,
+    postToTownSquareDisabled,
+    (isPermitted, isAdmin, isDefaultChannel, disabled) => {
+        if (!isPermitted) {
+            return false;
+        }
+        if (!isDefaultChannel || isAdmin || !disabled) {
+            return true;
+        }
+        return false;
+    },
 );

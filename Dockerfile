@@ -17,7 +17,7 @@ RUN make setup-go-work build-linux
 COPY NOTICE.txt /go/src/
 COPY README.md /go/src/
 COPY --from=client /home/webapp/channels/dist /go/src/webapp/channels/dist
-RUN date >> /go/src/server/templates/firebase-messaging-sw.js
+RUN echo "// $(date)" >> /go/src/server/templates/firebase-messaging-sw.js
 RUN make package-linux
 
 FROM ubuntu:22.04

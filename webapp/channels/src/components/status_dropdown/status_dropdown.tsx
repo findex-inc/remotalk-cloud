@@ -36,6 +36,7 @@ import type {TAvatarSizeToken} from 'components/widgets/users/avatar/avatar';
 
 import {Constants, ModalIdentifiers, UserStatuses} from 'utils/constants';
 import {getCurrentDateTimeForTimezone, getCurrentMomentForTimezone} from 'utils/timezone';
+import {getFullName} from 'utils/utils';
 
 import type {ModalData} from 'types/actions';
 import type {Menu as MenuType} from 'types/store/plugins';
@@ -525,7 +526,7 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
                                 <Text
                                     className={'bold'}
                                     margin={'none'}
-                                >{`${currentUser.first_name} ${currentUser.last_name}`}</Text>
+                                >{getFullName(currentUser)}</Text>
                                 <Text
                                     margin={'none'}
                                     className={!currentUser.first_name && !currentUser.last_name ? 'bold' : 'contrast'}

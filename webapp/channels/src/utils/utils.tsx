@@ -915,7 +915,7 @@ function changeColor(colourIn: string, amt: number): string {
 
 export function getFullName(user: UserProfile) {
     if (user.first_name && user.last_name) {
-        return user.first_name + ' ' + user.last_name;
+        return user.last_name + ' ' + user.first_name;
     } else if (user.first_name) {
         return user.first_name;
     } else if (user.last_name) {

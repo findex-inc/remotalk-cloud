@@ -81,7 +81,7 @@ export type Props = {
     isGroupsEnabled: boolean;
     remotalkPluginEnabled: boolean;
     actions: {
-        addUsersToChannel: (channelId: string, userIds: string[]) => Promise<any>;
+        addUsersToChannel: (channelId: string, userIds: string[]) => Promise<ActionResult>;
         getProfilesNotInChannel: (teamId: string, channelId: string, groupConstrained: boolean, page: number, perPage?: number) => Promise<ActionResult>;
         getProfilesInChannel: (channelId: string, page: number, perPage: number, sort: string, options: {active?: boolean}) => Promise<ActionResult>;
         getTeamStats: (teamId: string) => void;
@@ -345,7 +345,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
 
         this.setState({saving: true});
 
-        actions.addUsersToChannel(channel.id, userIds).then((result: any) => {
+        actions.addUsersToChannel(channel.id, userIds).then((result) => {
             if (result.error) {
                 this.handleInviteError(result.error);
             } else {

@@ -17,10 +17,11 @@ import (
 func (api *API) InitReports() {
 	api.BaseRoutes.Reports.Handle("/users", api.APISessionRequired(getUsersForReporting)).Methods("GET")
 	api.BaseRoutes.Reports.Handle("/users/count", api.APISessionRequired(getUserCountForReporting)).Methods("GET")
+	api.BaseRoutes.Reports.Handle("/users/export", api.APISessionRequired(startUsersBatchExport)).Methods("POST")
 }
 
 func getUsersForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !(c.IsSystemAdmin() && c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionSysconsoleReadUserManagementUsers)) {
+	if !(c.IsSystemAdmin()) {
 		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
 		return
 	}
@@ -51,7 +52,7 @@ func getUsersForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserCountForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !(c.IsSystemAdmin() && c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionSysconsoleReadUserManagementUsers)) {
+	if !(c.IsSystemAdmin()) {
 		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
 		return
 	}
@@ -71,6 +72,26 @@ func getUserCountForReporting(c *Context, w http.ResponseWriter, r *http.Request
 	if jsonErr := json.NewEncoder(w).Encode(count); jsonErr != nil {
 		c.Logger.Warn("Error writing response", mlog.Err(jsonErr))
 	}
+}
+
+func startUsersBatchExport(c *Context, w http.ResponseWriter, r *http.Request) {
+	if !(c.IsSystemAdmin()) {
+		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
+		return
+	}
+
+	dateRange := r.URL.Query().Get("date_range")
+	if dateRange == "" {
+		dateRange = "all_time"
+	}
+
+	startAt, endAt := model.GetReportDateRange(dateRange, time.Now())
+	if err := c.App.StartUsersBatchExport(c.AppContext, dateRange, startAt, endAt); err != nil {
+		c.Err = err
+		return
+	}
+
+	ReturnStatusOK(w)
 }
 
 func fillReportingBaseOptions(values url.Values) model.ReportingBaseOptions {

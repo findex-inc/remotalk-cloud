@@ -182,3 +182,80 @@ export const getUserProfileItemsToHide = createSelector(
         return str.split(',').map((x) => x.trim());
     },
 );
+
+export function getTenantInfo(s: any) {
+    const tenant = getRemoTalkPluginState(s)?.tenant;
+    if (!tenant) {
+        return undefined;
+    }
+    return tenant as {
+        hospitals?: {[id: string]: {id: number; name: string; sort?: number}};
+        departments?: {[id: string]: {id: number; name: string; sort?: number}};
+        professions?: {[id: string]: {id: number; name: string; sort?: number}};
+    };
+}
+
+export const getHospitals = createSelector(
+    'getHospitals',
+    getTenantInfo,
+    (t) => {
+        if (!t || !t.hospitals) {
+            return [];
+        }
+        return Object.values(t.hospitals).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+    },
+);
+
+export const getDepartments = createSelector(
+    'getDepartments',
+    getTenantInfo,
+    (t) => {
+        if (!t || !t.departments) {
+            return [];
+        }
+        return Object.values(t.departments).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+    },
+);
+
+export const getProfessions = createSelector(
+    'getProfessions',
+    getTenantInfo,
+    (t) => {
+        if (!t || !t.professions) {
+            return [];
+        }
+        return Object.values(t.professions).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+    },
+);
+
+export const selectStaffSummaries = createSelector(
+    'selectStaffSummaries',
+    (s: any) => getRemoTalkPluginState(s)?.staffs,
+    getTenantInfo,
+    (staffs, tenant) => {
+        const result: {[key: string]: {hospital?: string; department?: string; profession?: string}} = {};
+        if (!staffs || typeof staffs !== 'object') {
+            return result;
+        }
+        const userIds = Object.keys(staffs);
+        if (!tenant) {
+            for (const id of userIds) {
+                result[id] = {};
+            }
+            return result;
+        }
+        const {hospitals, departments, professions} = tenant;
+        for (const id of userIds) {
+            const s = staffs[id];
+            const h = hospitals && s.hospital ? hospitals[s.hospital.toString()] : undefined;
+            const d = departments && s.department ? departments[s.department.toString()] : undefined;
+            const p = professions && s.profession ? professions[s.profession.toString()] : undefined;
+            result[id] = {
+                hospital: h?.name,
+                department: d?.name,
+                profession: p?.name,
+            };
+        }
+        return result;
+    },
+);

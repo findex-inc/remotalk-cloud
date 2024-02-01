@@ -399,3 +399,37 @@ export function submitInteractiveDialog(submission: DialogSubmission): NewAction
         return {data};
     };
 }
+
+// For RemoTalk plugin
+
+export function getStaffSummaries(userIds: string[]): NewActionFuncAsync<{
+    [key: string]: {
+        user_id: string;
+        psc_id?: number;
+        hospital?: number;
+        department?: number;
+        profession?: number;
+    };
+}> {
+    return async (dispatch, getState) => {
+        try {
+            const data = await Client4.getStaffSummaries(userIds);
+            for (const id of userIds) {
+                if (data[id]) {
+                    continue;
+                }
+                data[id] = {user_id: id};
+            }
+            dispatch({
+                type: 'RECEIVED_STAFF_SUMMARIES',
+                data,
+            });
+            return {data};
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+
+            dispatch(logError(error));
+            return {error};
+        }
+    };
+}

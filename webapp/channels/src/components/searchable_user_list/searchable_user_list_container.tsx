@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useState} from 'react';
+import type {CSSProperties} from 'react';
 
 import type {Channel, ChannelMembership} from '@mattermost/types/channels';
 import type {TeamMembership} from '@mattermost/types/teams';
@@ -36,6 +37,12 @@ type Props = {
         };
     };
     focusOnMount?: boolean;
+
+    // For RemoTalk
+    customFilterOptions?: {[key: string]: Array<{value: number; label: string}>};
+    customFilterValue?: {[key: string]: number | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: number | undefined}) => Promise<void>;
+    customFilterStyle?: CSSProperties;
 }
 
 export default function SearchableUserListContainer(props: Props) {

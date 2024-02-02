@@ -2,9 +2,12 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import type {CSSProperties} from 'react';
 import Scrollbars from 'react-custom-scrollbars';
 import {FormattedMessage, injectIntl} from 'react-intl';
 import type {IntlShape} from 'react-intl';
+import ReactSelect from 'react-select';
+import type {ValueType} from 'react-select';
 
 import type {Channel, ChannelMembership} from '@mattermost/types/channels';
 import type {TeamMembership} from '@mattermost/types/teams';
@@ -55,6 +58,12 @@ type Props = {
 
     // the type of user list row to render
     rowComponentType?: React.ComponentType<any>;
+
+    // For RemoTalk
+    customFilterOptions?: {[key: string]: Array<{value: number; label: string}>};
+    customFilterValue?: {[key: string]: number | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: number | undefined}) => Promise<void>;
+    customFilterStyle?: CSSProperties;
 }
 
 const renderView = (props: Record<string, unknown>): JSX.Element => (
@@ -226,12 +235,61 @@ class SearchableUserList extends React.PureComponent<Props, State> {
         return null;
     };
 
+    // For RemoTalk plugin
+    private onCustomFilterChange = (value: ValueType<{value: number}>, key: string) => {
+        if (!this.props.handleCustomFilterChange || !this.props.customFilterValue) {
+            return;
+        }
+        const v = value && 'value' in value ? value.value : undefined;
+        this.props.handleCustomFilterChange({
+            ...this.props.customFilterValue,
+            [key]: v,
+        });
+    };
+
+    // For RemoTalk plugin
+    private renderCustomFilter = () => {
+        if (!this.props.customFilterOptions) {
+            return null;
+        }
+        return Object.entries(this.props.customFilterOptions).map(([key, options]) => {
+            if (!options.length) {
+                return null;
+            }
+            const current = this.props.customFilterValue ? this.props.customFilterValue[key] : undefined;
+            const found = options.find((x) => x.value === current);
+            return (
+                <div
+                    style={this.props.customFilterStyle}
+                    key={key}
+                >
+                    <ReactSelect
+                        value={found}
+                        options={options}
+                        onChange={(v) => this.onCustomFilterChange(v, key)}
+                        styles={{
+                            menu: (provided) => ({...provided, zIndex: 9999, marginTop: '1px'}),
+                        }}
+                    />
+                </div>
+            );
+        });
+    };
+
+    // For RemoTalk plugin
+    private isCustomFilterApplied = () => {
+        if (!this.props.customFilterOptions || !this.props.customFilterValue) {
+            return false;
+        }
+        return !Object.values(this.props.customFilterValue).every((x) => !x);
+    };
+
     render() {
         let nextButton;
         let previousButton;
         let usersToDisplay;
 
-        if (this.props.term || !this.props.users) {
+        if (this.props.term || !this.props.users || this.isCustomFilterApplied()) {
             usersToDisplay = this.props.users;
         } else if (!this.props.term) {
             const pageStart = this.props.page * this.props.usersPerPage;
@@ -279,27 +337,35 @@ class SearchableUserList extends React.PureComponent<Props, State> {
             if (this.props.renderFilterRow) {
                 filterRow = this.props.renderFilterRow(this.handleInput);
             } else {
+                const customFilter = this.renderCustomFilter();
                 filterRow = (
-                    <div className='col-xs-12'>
-                        <label
-                            className='hidden-label'
-                            htmlFor='searchUsersInput'
-                        >
-                            <FormattedMessage
-                                id='filtered_user_list.search'
-                                defaultMessage='Search users'
+                    <>
+                        {customFilter && (
+                            <div className='col-xs-12'>
+                                {customFilter}
+                            </div>
+                        )}
+                        <div className='col-xs-12'>
+                            <label
+                                className='hidden-label'
+                                htmlFor='searchUsersInput'
+                            >
+                                <FormattedMessage
+                                    id='filtered_user_list.search'
+                                    defaultMessage='Search users'
+                                />
+                            </label>
+                            <QuickInput
+                                ref={this.filterRef}
+                                id='searchUsersInput'
+                                className='form-control filter-textbox'
+                                placeholder={this.props.intl.formatMessage({id: 'filtered_user_list.search', defaultMessage: 'Search users'})}
+                                aria-label={this.props.intl.formatMessage({id: 'filtered_user_list.search', defaultMessage: 'Search users'})}
+                                onInput={this.handleInput}
+                                value={this.props.term}
                             />
-                        </label>
-                        <QuickInput
-                            ref={this.filterRef}
-                            id='searchUsersInput'
-                            className='form-control filter-textbox'
-                            placeholder={this.props.intl.formatMessage({id: 'filtered_user_list.search', defaultMessage: 'Search users'})}
-                            aria-label={this.props.intl.formatMessage({id: 'filtered_user_list.search', defaultMessage: 'Search users'})}
-                            onInput={this.handleInput}
-                            value={this.props.term}
-                        />
-                    </div>
+                        </div>
+                    </>
                 );
             }
         }

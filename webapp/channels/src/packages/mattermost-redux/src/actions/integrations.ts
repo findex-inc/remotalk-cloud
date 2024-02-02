@@ -435,9 +435,9 @@ export function getStaffSummaries(userIds: string[]): NewActionFuncAsync<{
 }
 
 export function searchFilteredUserIds(params: {
-    hospital_id: number;
-    department_id: number;
-    profession_id: number;
+    hospital_id: number | undefined;
+    department_id: number | undefined;
+    profession_id: number | undefined;
 }): NewActionFuncAsync<string[]> {
     return async (dispatch, getState) => {
         if (Object.values(params).every((x) => !x)) {

@@ -48,6 +48,11 @@ type StaffSummary = {
     department?: string;
     profession?: string;
 };
+type FilterParams = {
+    hospital_id: number;
+    department_id: number;
+    profession_id: number;
+}
 
 type UserProfileValue = Value & UserProfile;
 
@@ -99,6 +104,7 @@ export type Props = {
 
         // For RemoTalk plugin
         getStaffSummaries: (userIds: string[]) => Promise<ActionResult>;
+        searchFilteredUserIds: (params: FilterParams) => Promise<ActionResult<string[]>>;
     };
 }
 
@@ -515,13 +521,10 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     private onFilterChange = async (val: ValueType<FilterOption>, key: FilterKey) => {
         const id = val && 'value' in val ? val.value : undefined;
         const params = {...this.state.filterParams, [key]: id};
-        let filtered: string[] = [];
-        if (Object.values(params).some((x) => Boolean(x))) {
-            filtered = await Client4.searchFilteredUserIds(params);
-        }
+        const result = await this.props.actions.searchFilteredUserIds(params);
         this.setState({
             filterParams: params,
-            filteredUserIds: filtered,
+            filteredUserIds: result.data ?? [],
         });
     };
 

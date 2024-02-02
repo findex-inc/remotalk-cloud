@@ -9,7 +9,7 @@ import type {TeamMembership} from '@mattermost/types/teams';
 import type {UserProfile} from '@mattermost/types/users';
 import type {RelationOneToOne} from '@mattermost/types/utilities';
 
-import {getStaffSummaries} from 'mattermost-redux/actions/integrations';
+import {getStaffSummaries, searchFilteredUserIds} from 'mattermost-redux/actions/integrations';
 import {getTeamStats, getTeamMembersByIds} from 'mattermost-redux/actions/teams';
 import {getProfilesNotInChannel, getProfilesInChannel, searchProfiles} from 'mattermost-redux/actions/users';
 import {Permissions} from 'mattermost-redux/constants';
@@ -130,6 +130,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
 
             // For RemoTalk plugin
             getStaffSummaries,
+            searchFilteredUserIds,
         }, dispatch),
     };
 }

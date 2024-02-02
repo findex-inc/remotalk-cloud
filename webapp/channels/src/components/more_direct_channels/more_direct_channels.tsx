@@ -359,6 +359,7 @@ class MoreDirectChannels extends React.PureComponent<Props, State> {
     };
 
     render() {
+        // For RemoTalk plugin
         const filteredUsers = this.props.users.filter((x) => this.hitTenantFilter(x));
         const body = (
             <List

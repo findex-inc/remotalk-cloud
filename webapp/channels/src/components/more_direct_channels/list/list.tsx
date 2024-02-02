@@ -137,6 +137,7 @@ const List = React.forwardRef((props: Props, ref?: React.Ref<MultiSelect<OptionV
             totalCount={props.totalCount}
             placeholderText={intl.formatMessage({id: 'multiselect.placeholder', defaultMessage: 'Search and add members'})}
 
+            // For RemoTalk plugin
             customFilterOptions={props.customFilterOptions}
             customFilterStyle={{padding: '0.5rem 15px'}}
             customFilterValue={props.customFilterValue}

@@ -88,9 +88,9 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
         // For RemoTalk plugin
         const remotalkPluginEnabled = isRemoTalkPluginEnabled(state);
         const staffSummaries = selectStaffSummaries(state);
-        const hospitals = getHospitals(state).map((x) => ({value: x.id.toString(), label: x.name}));
-        const departments = getDepartments(state).map((x) => ({value: x.id.toString(), label: x.name}));
-        const professions = getProfessions(state).map((x) => ({value: x.id.toString(), label: x.name}));
+        const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
+        const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
+        const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
 
         return {
             profilesNotInCurrentChannel,

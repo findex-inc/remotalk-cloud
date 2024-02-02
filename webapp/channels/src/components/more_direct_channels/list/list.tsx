@@ -38,9 +38,9 @@ type Props = {
     values: OptionValue[];
 
     // For RemoTalk
-    customFilterOptions?: {[key: string]: Array<{value: string; label: string}>};
-    customFilterValue?: {[key: string]: string | undefined};
-    handleCustomFilterChange?: (value: {[key: string]: string | undefined}) => Promise<void>;
+    customFilterOptions?: {[key: string]: Array<{value: number; label: string}>};
+    customFilterValue?: {[key: string]: number | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: number | undefined}) => Promise<void>;
 }
 
 const List = React.forwardRef((props: Props, ref?: React.Ref<MultiSelect<OptionValue>>) => {

@@ -38,16 +38,16 @@ const USERS_FROM_DMS = 10;
 const MAX_USERS = 25;
 
 // For RemoTalk plugin
-type FilterOption = {value: string; label: string};
+type FilterOption = {value: number; label: string};
 type StaffSummary = {
     hospital?: string;
     department?: string;
     profession?: string;
 };
 type FilterParams = {
-    hospital_id: number;
-    department_id: number;
-    profession_id: number;
+    hospital_id: number | undefined;
+    department_id: number | undefined;
+    profession_id: number | undefined;
 }
 
 type UserProfileValue = Value & UserProfile;
@@ -434,30 +434,21 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         const result: {[key: string]: FilterOption[]} = {};
         if (this.props.hospitals.length > 1) {
             result.hospital_id = [{
-                value: '0',
+                value: 0,
                 label: localizeMessage('remotalk.channel_invite.hospital.select', 'Select Hospital'),
             }].concat(this.props.hospitals);
         }
         if (this.props.departments.length > 1) {
             result.department_id = [{
-                value: '0',
+                value: 0,
                 label: localizeMessage('remotalk.channel_invite.department.select', 'Select Department'),
             }].concat(this.props.departments);
         }
         if (this.props.professions.length > 1) {
             result.profession_id = [{
-                value: '0',
+                value: 0,
                 label: localizeMessage('remotalk.channel_invite.profession.select', 'Select Profession'),
             }].concat(this.props.professions);
-        }
-        return result;
-    };
-
-    // For RemoTalk plugin
-    private getFilterValue = () => {
-        const result: {[key: string]: string | undefined} = {};
-        for (const [key, value] of Object.entries(this.state.filterParams)) {
-            result[key] = value?.toString();
         }
         return result;
     };
@@ -472,26 +463,23 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     };
 
     // For RemoTalk plugin
-    private parseIntOrDefault = (value: string | undefined, defaultValue = 0) => {
-        if (!value) {
-            return defaultValue;
-        }
-        const result = Number.parseInt(value, 10);
-        return Number.isNaN(result) ? defaultValue : result;
-    };
-
-    // For RemoTalk plugin
-    private onFilterChange = async (value: {[key: string]: string | undefined}) => {
+    private onFilterChange = async (value: {[key: string]: number | undefined}) => {
         const params = {
-            hospital_id: this.parseIntOrDefault(value.hospital_id),
-            department_id: this.parseIntOrDefault(value.department_id),
-            profession_id: this.parseIntOrDefault(value.profession_id),
+            hospital_id: value.hospital_id,
+            department_id: value.department_id,
+            profession_id: value.profession_id,
         };
         const result = await this.props.actions.searchFilteredUserIds(params);
         this.setState({
             filterParams: params,
             filteredUserIds: result.data ?? [],
         });
+    };
+
+    // For RemoTalk plugin
+    private hitTenantFilter = (profile: {id: string}) => {
+        return Object.values(this.state.filterParams).every((x) => !x) ||
+            this.state.filteredUserIds.includes(profile.id);
     };
 
     renderOption = (option: UserProfileValue | GroupValue, isSelected: boolean, onAdd: (option: UserProfileValue | GroupValue) => void, onMouseMove: (option: UserProfileValue | GroupValue) => void) => {
@@ -614,11 +602,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         );
 
         // For RemoTalk plugin
-        const filteredUserList = this.state.groupAndUserOptions.filter(
-            (x) =>
-                Object.values(this.state.filterParams).every((x) => !x) ||
-                this.state.filteredUserIds.includes(x.id),
-        );
+        const filteredUserList = this.state.groupAndUserOptions.filter((x) => this.hitTenantFilter(x));
         const content = (
             <MultiSelect
                 key='addUsersToChannelKey'
@@ -649,7 +633,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
 
                 // For RemoTalk plugin
                 customFilterOptions={this.getTenantFilterOptions()}
-                customFilterValue={this.getFilterValue()}
+                customFilterValue={this.state.filterParams}
                 handleCustomFilterChange={this.onFilterChange}
                 customFilterStyle={{padding: '0.5rem 3.2rem'}}
             />

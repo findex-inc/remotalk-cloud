@@ -69,9 +69,9 @@ export type Props<T extends Value> = {
     customNoOptionsMessage?: React.ReactNode;
 
     // For RemoTalk
-    customFilterOptions?: {[key: string]: Array<{value: string; label: string}>};
-    customFilterValue?: {[key: string]: string | undefined};
-    handleCustomFilterChange?: (value: {[key: string]: string | undefined}) => Promise<void>;
+    customFilterOptions?: {[key: string]: Array<{value: number; label: string}>};
+    customFilterValue?: {[key: string]: number | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: number | undefined}) => Promise<void>;
     customFilterStyle?: CSSProperties;
 }
 
@@ -271,7 +271,8 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
         this.props.handleDelete(values);
     };
 
-    private onCustomFilterChange = (value: ValueType<{value: string}>, key: string) => {
+    // For RemoTalk plugin
+    private onCustomFilterChange = (value: ValueType<{value: number}>, key: string) => {
         if (!this.props.handleCustomFilterChange || !this.props.customFilterValue) {
             return;
         }
@@ -464,6 +465,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             );
         }
 
+        // For RemoTalk plugin
         let customFilters;
         if (this.props.customFilterOptions) {
             customFilters = Object.entries(this.props.customFilterOptions).map(([key, options]) => {

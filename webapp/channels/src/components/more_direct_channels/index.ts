@@ -8,6 +8,7 @@ import type {Dispatch} from 'redux';
 import type {UserProfile} from '@mattermost/types/users';
 
 import {searchGroupChannels} from 'mattermost-redux/actions/channels';
+import {getStaffSummaries, searchFilteredUserIds} from 'mattermost-redux/actions/integrations';
 import {
     getProfiles,
     getProfilesInTeam,
@@ -30,6 +31,7 @@ import {openDirectChannelToUserId, openGroupChannelToUserIds} from 'actions/chan
 import {loadStatusesForProfilesList, loadProfilesMissingStatus} from 'actions/status_actions';
 import {loadProfilesForGroupChannels} from 'actions/user_actions';
 import {setModalSearchTerm} from 'actions/views/search';
+import {getDepartments, getHospitals, getProfessions, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -70,6 +72,13 @@ const makeMapStateToProps = () => {
         const team = getCurrentTeam(state);
         const stats = getTotalUsersStatsSelector(state) || {total_users_count: 0};
 
+        // For RemoTalk plugin
+        const remotalkPluginEnabled = isRemoTalkPluginEnabled(state);
+        const staffSummaries = selectStaffSummaries(state);
+        const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
+        const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
+        const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
+
         return {
             currentTeamId: team.id,
             currentTeamName: team.name,
@@ -79,6 +88,13 @@ const makeMapStateToProps = () => {
             currentUserId,
             restrictDirectMessage,
             totalCount: stats.total_users_count,
+
+            // For RemoTalk plugin
+            remotalkPluginEnabled,
+            staffSummaries,
+            hospitals,
+            departments,
+            professions,
         };
     };
 };
@@ -97,6 +113,10 @@ function mapDispatchToProps(dispatch: Dispatch) {
             searchProfiles,
             searchGroupChannels,
             setModalSearchTerm,
+
+            // For RemoTalk plugin
+            getStaffSummaries,
+            searchFilteredUserIds,
         }, dispatch),
     };
 }

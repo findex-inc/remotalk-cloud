@@ -5,6 +5,7 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
+import {getStaffSummaries, searchFilteredUserIds} from 'mattermost-redux/actions/integrations';
 import {getTeamStats, getTeamMembers} from 'mattermost-redux/actions/teams';
 import {searchProfiles} from 'mattermost-redux/actions/users';
 import {Permissions} from 'mattermost-redux/constants';
@@ -15,6 +16,7 @@ import {getProfilesInCurrentTeam, searchProfilesInCurrentTeam} from 'mattermost-
 import {loadStatusesForProfilesList} from 'actions/status_actions';
 import {loadProfilesAndTeamMembers, loadTeamMembersForProfilesList} from 'actions/user_actions';
 import {setModalSearchTerm} from 'actions/views/search';
+import {isRemoTalkPluginEnabled, selectStaffSummaries, getHospitals, getDepartments, getProfessions} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -38,6 +40,13 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
 
     const stats = getCurrentTeamStats(state) || {active_member_count: 0};
 
+    // For RemoTalk plugin
+    const remotalkPluginEnabled = isRemoTalkPluginEnabled(state);
+    const staffSummaries = selectStaffSummaries(state);
+    const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
+    const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
+    const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
+
     return {
         searchTerm,
         users,
@@ -45,6 +54,13 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
         currentTeamId: state.entities.teams.currentTeamId,
         totalTeamMembers: stats.active_member_count,
         canManageTeamMembers,
+
+        // For RemoTalk plugin
+        remotalkPluginEnabled,
+        staffSummaries,
+        hospitals,
+        departments,
+        professions,
     };
 }
 
@@ -58,6 +74,10 @@ function mapDispatchToProps(dispatch: Dispatch) {
             loadStatusesForProfilesList,
             loadTeamMembersForProfilesList,
             setModalSearchTerm,
+
+            // For RemoTalk plugin
+            getStaffSummaries,
+            searchFilteredUserIds,
         }, dispatch),
     };
 }

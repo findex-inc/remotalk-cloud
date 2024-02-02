@@ -2,6 +2,8 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {injectIntl} from 'react-intl';
+import type {IntlShape} from 'react-intl';
 
 import type {TeamMembership, TeamStats, GetTeamMembersOpts} from '@mattermost/types/teams';
 import type {UserProfile} from '@mattermost/types/users';
@@ -17,6 +19,19 @@ import * as UserAgent from 'utils/user_agent';
 
 const USERS_PER_PAGE = 50;
 
+// For RemoTalk plugin
+type FilterOption = {value: number; label: string};
+type StaffSummary = {
+    hospital?: string;
+    department?: string;
+    profession?: string;
+};
+type FilterParams = {
+    hospital_id: number | undefined;
+    department_id: number | undefined;
+    profession_id: number | undefined;
+}
+
 type Props = {
     searchTerm: string;
     users: UserProfile[];
@@ -26,6 +41,15 @@ type Props = {
     currentTeamId: string;
     totalTeamMembers: number;
     canManageTeamMembers?: boolean;
+
+    // For RemoTalk plugin
+    intl: IntlShape;
+    remotalkPluginEnabled: boolean;
+    hospitals: FilterOption[];
+    departments: FilterOption[];
+    professions: FilterOption[];
+    staffSummaries: {[key: string]: StaffSummary};
+
     actions: {
         getTeamMembers: (teamId: string, page?: number, perPage?: number, options?: GetTeamMembersOpts) => Promise<ActionResult<TeamMembership[]>>;
         searchProfiles: (term: string, options?: {[key: string]: any}) => Promise<ActionResult<UserProfile[]>>;
@@ -34,14 +58,22 @@ type Props = {
         loadStatusesForProfilesList: (users: UserProfile[]) => void;
         loadTeamMembersForProfilesList: (profiles: any, teamId: string, reloadAllMembers: boolean) => Promise<ActionResult>;
         setModalSearchTerm: (term: string) => ActionResult;
+
+        // For RemoTalk plugin
+        getStaffSummaries: (userIds: string[]) => Promise<ActionResult>;
+        searchFilteredUserIds: (params: FilterParams) => Promise<ActionResult<string[]>>;
     };
 }
 
 type State = {
     loading: boolean;
+
+    // For RemoTalk plugin
+    filterParams: {[key: string]: number | undefined};
+    filteredUserIds: string[];
 }
 
-export default class MemberListTeam extends React.PureComponent<Props, State> {
+class MemberListTeam extends React.PureComponent<Props, State> {
     private searchTimeoutId: number;
 
     constructor(props: Props) {
@@ -51,6 +83,10 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
         this.state = {
             loading: true,
+
+            // For RemoTalk plugin
+            filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
+            filteredUserIds: [],
         };
     }
 
@@ -98,6 +134,9 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
                     this.setState({loading: true});
 
+                    // For RemoTalk plugin
+                    await this.loadStaffSummaries(data);
+
                     loadStatusesForProfilesList(data!);
                     loadTeamMembersForProfilesList(data, this.props.currentTeamId, true).then(({data: membersLoaded}) => {
                         if (membersLoaded) {
@@ -134,6 +173,62 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
         this.props.actions.setModalSearchTerm(term);
     };
 
+    // For RemoTalk plugin
+    private getTenantFilterOptions = () => {
+        const result: {[key: string]: FilterOption[]} = {};
+        if (this.props.hospitals.length > 1) {
+            result.hospital_id = [{
+                value: 0,
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.hospital.select', defaultMessage: 'Select Hospital'}),
+            }].concat(this.props.hospitals);
+        }
+        if (this.props.departments.length > 1) {
+            result.department_id = [{
+                value: 0,
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.department.select', defaultMessage: 'Select Department'}),
+            }].concat(this.props.departments);
+        }
+        if (this.props.professions.length > 1) {
+            result.profession_id = [{
+                value: 0,
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.profession.select', defaultMessage: 'Select Profession'}),
+            }].concat(this.props.professions);
+        }
+        return result;
+    };
+
+    // For RemoTalk plugin
+    private loadStaffSummaries = async (users: UserProfile[] | undefined) => {
+        if (!this.props.remotalkPluginEnabled || !users) {
+            return;
+        }
+        const idsToFetch = users.map((x) => x.id).filter((x) => Boolean(!this.props.staffSummaries[x]));
+        if (idsToFetch.length === 0) {
+            return;
+        }
+        await this.props.actions.getStaffSummaries(idsToFetch);
+    };
+
+    // For RemoTalk plugin
+    private onFilterChange = async (value: {[key: string]: number | undefined}) => {
+        const params = {
+            hospital_id: value.hospital_id,
+            department_id: value.department_id,
+            profession_id: value.profession_id,
+        };
+        const result = await this.props.actions.searchFilteredUserIds(params);
+        this.setState({
+            filterParams: params,
+            filteredUserIds: result.data ?? [],
+        });
+    };
+
+    // For RemoTalk plugin
+    private hitTenantFilter = (user: UserProfile) => {
+        return Object.values(this.state.filterParams).every((x) => !x) ||
+            this.state.filteredUserIds.includes(user.id);
+    };
+
     render() {
         let teamMembersDropdown;
         if (this.props.canManageTeamMembers) {
@@ -157,7 +252,7 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
             for (let i = 0; i < users.length; i++) {
                 const user = users[i];
 
-                if (teamMembers[user.id] && user.delete_at === 0) {
+                if (teamMembers[user.id] && user.delete_at === 0 && this.hitTenantFilter(user)) {
                     usersToDisplay.push(user);
                     actionUserProps[user.id] = {
                         teamMember: teamMembers[user.id],
@@ -176,7 +271,15 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
                 actions={teamMembersDropdown}
                 actionUserProps={actionUserProps}
                 focusOnMount={!UserAgent.isMobile()}
+
+                // For RemoTalk plugin
+                customFilterOptions={this.getTenantFilterOptions()}
+                customFilterValue={this.state.filterParams}
+                handleCustomFilterChange={this.onFilterChange}
+                customFilterStyle={{marginBottom: '0.5rem'}}
             />
         );
     }
 }
+
+export default injectIntl(MemberListTeam);

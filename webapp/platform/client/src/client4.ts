@@ -4344,27 +4344,6 @@ export default class Client4 {
     }
 
     // For RemoTalk plugin
-    getHospitals = () => {
-        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
-            `${this.getRemoTalkV1Route()}/hospitals`, {method: 'get'}
-        );
-    }
-
-    // For RemoTalk plugin
-    getDepartments = () => {
-        return this.doFetch<Array<{id: number; name: string; short_name: string}>>(
-            `${this.getRemoTalkV1Route()}/departments`, {method: 'get'}
-        );
-    }
-
-    // For RemoTalk plugin
-    getProfessions = () => {
-        return this.doFetch<Array<{id: number; name: string;}>>(
-            `${this.getRemoTalkV1Route()}/professions`, {method: 'get'}
-        );
-    }
-
-    // For RemoTalk plugin
     searchFilteredUserIds = (params: {hospital_id?: number, department_id?: number, profession_id?: number}) => {
         return this.doFetch<string[]>(
             `${this.getRemoTalkV1Route()}/staffs/search`,
@@ -4377,9 +4356,10 @@ export default class Client4 {
         return this.doFetch<{
             [key: string]: {
                 user_id: string;
-                hospital?: string;
-                department?: string;
-                profession?: string;
+                psc_id?: number;
+                hospital?: number;
+                department?: number;
+                profession?: number;
             };
         }>(`${this.getRemoTalkV1Route()}/staffs/summary`, {
             method: "post",

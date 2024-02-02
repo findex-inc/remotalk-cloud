@@ -3,12 +3,12 @@
 
 import classNames from 'classnames';
 import React from 'react';
-import type {ReactNode} from 'react';
+import type {CSSProperties, ReactNode} from 'react';
 import type {IntlShape} from 'react-intl';
 import {FormattedMessage} from 'react-intl';
 import ReactSelect, {components} from 'react-select';
 import type {getOptionValue} from 'react-select/src/builtins';
-import type {InputActionMeta} from 'react-select/src/types';
+import type {InputActionMeta, ValueType} from 'react-select/src/types';
 
 import SaveButton from 'components/save_button';
 import CloseCircleSolidIcon from 'components/widgets/icons/close_circle_solid_icon';
@@ -67,6 +67,12 @@ export type Props<T extends Value> = {
     savingEnabled?: boolean;
     handleCancel?: () => void;
     customNoOptionsMessage?: React.ReactNode;
+
+    // For RemoTalk
+    customFilterOptions?: {[key: string]: Array<{value: number; label: string}>};
+    customFilterValue?: {[key: string]: number | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: number | undefined}) => Promise<void>;
+    customFilterStyle?: CSSProperties;
 }
 
 export type State = {
@@ -265,6 +271,18 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
         this.props.handleDelete(values);
     };
 
+    // For RemoTalk plugin
+    private onCustomFilterChange = (value: ValueType<{value: number}>, key: string) => {
+        if (!this.props.handleCustomFilterChange || !this.props.customFilterValue) {
+            return;
+        }
+        const v = value && 'value' in value ? value.value : undefined;
+        this.props.handleCustomFilterChange({
+            ...this.props.customFilterValue,
+            [key]: v,
+        });
+    };
+
     MultiValueRemove = ({children, innerProps}: any) => (
         <div {...innerProps}>
             {children || <CloseCircleSolidIcon/>}
@@ -447,10 +465,38 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             );
         }
 
+        // For RemoTalk plugin
+        let customFilters;
+        if (this.props.customFilterOptions) {
+            customFilters = Object.entries(this.props.customFilterOptions).map(([key, options]) => {
+                if (!options.length) {
+                    return null;
+                }
+                const current = this.props.customFilterValue ? this.props.customFilterValue[key] : undefined;
+                const found = options.find((x) => x.value === current);
+                return (
+                    <div
+                        style={this.props.customFilterStyle}
+                        key={key}
+                    >
+                        <ReactSelect
+                            value={found}
+                            options={options}
+                            onChange={(v) => this.onCustomFilterChange(v, key)}
+                            styles={{
+                                menu: (provided) => ({...provided, zIndex: 9999, marginTop: '1px'}),
+                            }}
+                        />
+                    </div>
+                );
+            });
+        }
+
         return (
             <>
                 <div className='filtered-user-list'>
                     <div className='filter-row filter-row--full'>
+                        {customFilters}
                         <div className='multi-select__container react-select'>
                             <ReactSelect
                                 id='selectItems'

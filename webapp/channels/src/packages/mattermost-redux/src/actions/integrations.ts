@@ -433,3 +433,24 @@ export function getStaffSummaries(userIds: string[]): NewActionFuncAsync<{
         }
     };
 }
+
+export function searchFilteredUserIds(params: {
+    hospital_id: number;
+    department_id: number;
+    profession_id: number;
+}): NewActionFuncAsync<string[]> {
+    return async (dispatch, getState) => {
+        if (Object.values(params).every((x) => !x)) {
+            return {data: []};
+        }
+        try {
+            const data = await Client4.searchFilteredUserIds(params);
+            return {data};
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+
+            dispatch(logError(error));
+            return {error};
+        }
+    };
+}

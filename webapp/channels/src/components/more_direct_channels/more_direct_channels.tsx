@@ -4,7 +4,8 @@
 import {debounce} from 'lodash';
 import React from 'react';
 import {Modal} from 'react-bootstrap';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, injectIntl} from 'react-intl';
+import type {IntlShape} from 'react-intl';
 
 import type {Channel} from '@mattermost/types/channels';
 import type {UserProfile} from '@mattermost/types/users';
@@ -24,6 +25,19 @@ import {
 } from './types';
 import type {
     OptionValue} from './types';
+
+// For RemoTalk plugin
+type FilterOption = {value: string; label: string};
+type StaffSummary = {
+    hospital?: string;
+    department?: string;
+    profession?: string;
+};
+type FilterParams = {
+    hospital_id: number;
+    department_id: number;
+    profession_id: number;
+}
 
 export type Props = {
     currentUserId: string;
@@ -49,9 +63,18 @@ export type Props = {
     restrictDirectMessage?: string;
     onModalDismissed?: () => void;
     onExited?: () => void;
+
+    // For RemoTalk plugin
+    intl: IntlShape;
+    remotalkPluginEnabled: boolean;
+    hospitals: FilterOption[];
+    departments: FilterOption[];
+    professions: FilterOption[];
+    staffSummaries: {[key: string]: StaffSummary};
+
     actions: {
-        getProfiles: (page?: number | undefined, perPage?: number | undefined, options?: any) => Promise<ActionResult>;
-        getProfilesInTeam: (teamId: string, page: number, perPage?: number | undefined, sort?: string | undefined, options?: any) => Promise<ActionResult>;
+        getProfiles: (page?: number | undefined, perPage?: number | undefined, options?: any) => Promise<ActionResult<UserProfile[]>>;
+        getProfilesInTeam: (teamId: string, page: number, perPage?: number | undefined, sort?: string | undefined, options?: any) => Promise<ActionResult<UserProfile[]>>;
         loadProfilesMissingStatus: (users: UserProfile[]) => void;
         getTotalUsersStats: () => void;
         loadStatusesForProfilesList: (users: UserProfile[]) => void;
@@ -61,6 +84,10 @@ export type Props = {
         searchProfiles: (term: string, options: any) => Promise<ActionResult<UserProfile[]>>;
         searchGroupChannels: (term: string) => Promise<ActionResult<Channel[]>>;
         setModalSearchTerm: (term: string) => void;
+
+        // For RemoTalk plugin
+        getStaffSummaries: (userIds: string[]) => Promise<ActionResult>;
+        searchFilteredUserIds: (params: FilterParams) => Promise<ActionResult<string[]>>;
     };
 }
 
@@ -70,9 +97,13 @@ type State = {
     search: boolean;
     saving: boolean;
     loadingUsers: boolean;
+
+    // For RemoTalk plugin
+    filterParams: {[key: string]: number | undefined};
+    filteredUserIds: string[];
 }
 
-export default class MoreDirectChannels extends React.PureComponent<Props, State> {
+class MoreDirectChannels extends React.PureComponent<Props, State> {
     searchTimeoutId: any;
     exitToChannel?: string;
     multiselect: React.RefObject<MultiSelect<OptionValue>>;
@@ -104,6 +135,10 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
             search: false,
             saving: false,
             loadingUsers: true,
+
+            // For RemoTalk plugin
+            filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
+            filteredUserIds: [],
         };
     }
 
@@ -235,11 +270,15 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
     getUserProfiles = (page?: number) => {
         const pageNum = page ? page + 1 : 0;
         if (this.props.restrictDirectMessage === 'any') {
-            this.props.actions.getProfiles(pageNum, USERS_PER_PAGE * 2).then(() => {
+            this.props.actions.getProfiles(pageNum, USERS_PER_PAGE * 2).then((res) => {
+                return this.loadStaffSummaries(res.data);
+            }).then(() => {
                 this.setUsersLoadingState(false);
             });
         } else {
-            this.props.actions.getProfilesInTeam(this.props.currentTeamId, pageNum, USERS_PER_PAGE * 2).then(() => {
+            this.props.actions.getProfilesInTeam(this.props.currentTeamId, pageNum, USERS_PER_PAGE * 2).then((res) => {
+                return this.loadStaffSummaries(res.data);
+            }).then(() => {
                 this.setUsersLoadingState(false);
             });
         }
@@ -264,7 +303,78 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
         this.setState({values});
     };
 
+    // For RemoTalk plugin
+    private getTenantFilterOptions = () => {
+        const result: {[key: string]: FilterOption[]} = {};
+        if (this.props.hospitals.length > 1) {
+            result.hospital_id = [{
+                value: '0',
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.hospital.select', defaultMessage: 'Select Hospital'}),
+            }].concat(this.props.hospitals);
+        }
+        if (this.props.departments.length > 1) {
+            result.department_id = [{
+                value: '0',
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.department.select', defaultMessage: 'Select Department'}),
+            }].concat(this.props.departments);
+        }
+        if (this.props.professions.length > 1) {
+            result.profession_id = [{
+                value: '0',
+                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.profession.select', defaultMessage: 'Select Profession'}),
+            }].concat(this.props.professions);
+        }
+        return result;
+    };
+
+    // For RemoTalk plugin
+    private getFilterValue = () => {
+        const result: {[key: string]: string | undefined} = {};
+        for (const [key, value] of Object.entries(this.state.filterParams)) {
+            result[key] = value?.toString();
+        }
+        return result;
+    };
+
+    // For RemoTalk plugin
+    private loadStaffSummaries = async (users: UserProfile[] | undefined) => {
+        if (!this.props.remotalkPluginEnabled || !users) {
+            return;
+        }
+        const idsToFetch = users.map((x) => x.id).filter((x) => Boolean(!this.props.staffSummaries[x]));
+        if (idsToFetch.length === 0) {
+            return;
+        }
+        await this.props.actions.getStaffSummaries(idsToFetch);
+    };
+
+    // For RemoTalk plugin
+    private parseIntOrDefault = (value: string | undefined, defaultValue = 0) => {
+        if (!value) {
+            return defaultValue;
+        }
+        const result = Number.parseInt(value, 10);
+        return Number.isNaN(result) ? defaultValue : result;
+    };
+
+    // For RemoTalk plugin
+    private onFilterChange = async (value: {[key: string]: string | undefined}) => {
+        const params = {
+            hospital_id: this.parseIntOrDefault(value.hospital_id),
+            department_id: this.parseIntOrDefault(value.department_id),
+            profession_id: this.parseIntOrDefault(value.profession_id),
+        };
+        const result = await this.props.actions.searchFilteredUserIds(params);
+        this.setState({
+            filterParams: params,
+            filteredUserIds: result.data ?? [],
+        });
+    };
+
     render() {
+        const filteredUsers = this.props.users.filter((x) =>
+            Object.values(this.state.filterParams).every((x) => !x) ||
+            this.state.filteredUserIds.includes(x.id));
         const body = (
             <List
                 addValue={this.addValue}
@@ -278,8 +388,13 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
                 search={this.search}
                 selectedItemRef={this.selectedItemRef}
                 totalCount={this.props.totalCount}
-                users={this.props.users}
+                users={filteredUsers}
                 values={this.state.values}
+
+                // For RemoTalk plugin
+                customFilterOptions={this.getTenantFilterOptions()}
+                customFilterValue={this.getFilterValue()}
+                handleCustomFilterChange={this.onFilterChange}
             />
         );
 
@@ -326,3 +441,5 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
         );
     }
 }
+
+export default injectIntl(MoreDirectChannels);

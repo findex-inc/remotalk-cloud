@@ -36,6 +36,11 @@ type Props = {
      * An array of values that have been selected by the user in the multiselect.
      */
     values: OptionValue[];
+
+    // For RemoTalk
+    customFilterOptions?: {[key: string]: Array<{value: string; label: string}>};
+    customFilterValue?: {[key: string]: string | undefined};
+    handleCustomFilterChange?: (value: {[key: string]: string | undefined}) => Promise<void>;
 }
 
 const List = React.forwardRef((props: Props, ref?: React.Ref<MultiSelect<OptionValue>>) => {
@@ -131,6 +136,11 @@ const List = React.forwardRef((props: Props, ref?: React.Ref<MultiSelect<OptionV
             users={props.users}
             totalCount={props.totalCount}
             placeholderText={intl.formatMessage({id: 'multiselect.placeholder', defaultMessage: 'Search and add members'})}
+
+            customFilterOptions={props.customFilterOptions}
+            customFilterStyle={{padding: '0.5rem 15px'}}
+            customFilterValue={props.customFilterValue}
+            handleCustomFilterChange={props.handleCustomFilterChange}
         />
     );
 });

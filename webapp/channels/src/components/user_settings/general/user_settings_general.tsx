@@ -126,7 +126,7 @@ export type Props = {
     ldapPictureAttributeSet?: boolean;
 
     // For RemoTalk plugin
-    itemsToHide: string[];
+    itemsToHide?: string[];
 }
 
 type State = {
@@ -1388,37 +1388,37 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                         }
                     />
                     <div className='divider-dark first'/>
-                    {this.props.itemsToHide.includes('name') ? null : (
+                    {this.props.itemsToHide?.includes('name') ? null : (
                         <>
                             {nameSection}
                             <div className='divider-light'/>
                         </>
                     )}
-                    {this.props.itemsToHide.includes('username') ? null : (
+                    {this.props.itemsToHide?.includes('username') ? null : (
                         <>
                             {usernameSection}
                             <div className='divider-light'/>
                         </>
                     )}
-                    {this.props.itemsToHide.includes('nickname') ? null : (
+                    {this.props.itemsToHide?.includes('nickname') ? null : (
                         <>
                             {nicknameSection}
                             <div className='divider-light'/>
                         </>
                     )}
-                    {this.props.itemsToHide.includes('position') ? null : (
+                    {this.props.itemsToHide?.includes('position') ? null : (
                         <>
                             {positionSection}
                             <div className='divider-light'/>
                         </>
                     )}
-                    {this.props.itemsToHide.includes('email') ? null : (
+                    {this.props.itemsToHide?.includes('email') ? null : (
                         <>
                             {emailSection}
                             <div className='divider-light'/>
                         </>
                     )}
-                    {this.props.itemsToHide.includes('picture') ? null : (
+                    {this.props.itemsToHide?.includes('picture') ? null : (
                         <>
                             {pictureSection}
                             <div className='divider-dark'/>

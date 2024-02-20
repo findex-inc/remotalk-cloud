@@ -16,7 +16,15 @@ import type {GlobalState} from 'types/store';
 
 import UserSettingsNotifications from './user_settings_notifications';
 
-const mapStateToProps = (state: GlobalState) => {
+const mapStateToProps = (state: GlobalState): {
+    sendPushNotifications: boolean;
+    enableAutoResponder: boolean;
+    isCollapsedThreadsEnabled: boolean;
+    isCallsRingingEnabled: boolean;
+    isEnterpriseOrCloudOrSKUStarterFree: boolean;
+    isEnterpriseReady: boolean;
+    sendEmailNotifications?: boolean;
+} => {
     const config = getConfig(state);
 
     const sendPushNotifications = config.SendPushNotifications === 'true';
@@ -36,7 +44,7 @@ const mapStateToProps = (state: GlobalState) => {
         isEnterpriseReady,
 
         // For RemoTalk plugin
-        sendEmailNotifications: config.SendEmailNotifications === 'true',
+        sendEmailNotifications: config.SendEmailNotifications ? config.SendEmailNotifications === 'true' : undefined,
     };
 };
 

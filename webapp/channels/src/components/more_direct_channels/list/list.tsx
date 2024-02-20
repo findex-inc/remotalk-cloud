@@ -9,6 +9,7 @@ import type {UserProfile} from '@mattermost/types/users';
 import MultiSelect from 'components/multiselect/multiselect';
 
 import Constants from 'utils/constants';
+import {getDisplayName} from 'utils/utils';
 
 import ListItem from '../list_item';
 import {optionValue} from '../types';
@@ -149,7 +150,7 @@ const List = React.forwardRef((props: Props, ref?: React.Ref<MultiSelect<OptionV
 export default List;
 
 function renderValue(props: {data: OptionValue}) {
-    return (props.data as UserProfile).username;
+    return getDisplayName(props.data as UserProfile);
 }
 
 function renderAriaLabel(option: OptionValue) {

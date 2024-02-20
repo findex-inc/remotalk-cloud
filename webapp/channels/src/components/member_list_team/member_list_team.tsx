@@ -2,7 +2,6 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import {injectIntl} from 'react-intl';
 import type {IntlShape} from 'react-intl';
 
 import type {TeamMembership, TeamStats, GetTeamMembersOpts} from '@mattermost/types/teams';
@@ -43,12 +42,12 @@ type Props = {
     canManageTeamMembers?: boolean;
 
     // For RemoTalk plugin
-    intl: IntlShape;
-    remotalkPluginEnabled: boolean;
-    hospitals: FilterOption[];
-    departments: FilterOption[];
-    professions: FilterOption[];
-    staffSummaries: {[key: string]: StaffSummary};
+    intl?: IntlShape;
+    remotalkPluginEnabled?: boolean;
+    hospitals?: FilterOption[];
+    departments?: FilterOption[];
+    professions?: FilterOption[];
+    staffSummaries?: {[key: string]: StaffSummary};
 
     actions: {
         getTeamMembers: (teamId: string, page?: number, perPage?: number, options?: GetTeamMembersOpts) => Promise<ActionResult<TeamMembership[]>>;
@@ -60,8 +59,8 @@ type Props = {
         setModalSearchTerm: (term: string) => ActionResult;
 
         // For RemoTalk plugin
-        getStaffSummaries: (userIds: string[]) => Promise<ActionResult>;
-        searchFilteredUserIds: (params: FilterParams) => Promise<ActionResult<string[]>>;
+        getStaffSummaries?: (userIds: string[]) => Promise<ActionResult>;
+        searchFilteredUserIds?: (params: FilterParams) => Promise<ActionResult<string[]>>;
     };
 }
 
@@ -73,7 +72,7 @@ type State = {
     filteredUserIds: string[];
 }
 
-class MemberListTeam extends React.PureComponent<Props, State> {
+export default class MemberListTeam extends React.PureComponent<Props, State> {
     private searchTimeoutId: number;
 
     constructor(props: Props) {
@@ -109,6 +108,7 @@ class MemberListTeam extends React.PureComponent<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
+        this.loadStaffSummaries();
         if (prevProps.searchTerm !== this.props.searchTerm) {
             clearTimeout(this.searchTimeoutId);
 
@@ -133,9 +133,6 @@ class MemberListTeam extends React.PureComponent<Props, State> {
                     }
 
                     this.setState({loading: true});
-
-                    // For RemoTalk plugin
-                    await this.loadStaffSummaries(data);
 
                     loadStatusesForProfilesList(data!);
                     loadTeamMembersForProfilesList(data, this.props.currentTeamId, true).then(({data: membersLoaded}) => {
@@ -176,33 +173,31 @@ class MemberListTeam extends React.PureComponent<Props, State> {
     // For RemoTalk plugin
     private getTenantFilterOptions = () => {
         const result: {[key: string]: FilterOption[]} = {};
-        if (this.props.hospitals.length > 1) {
-            result.hospital_id = [{
-                value: 0,
-                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.hospital.select', defaultMessage: 'Select Hospital'}),
-            }].concat(this.props.hospitals);
+        if (this.props.hospitals && this.props.hospitals.length > 1) {
+            const label = this.props.intl ? this.props.intl.formatMessage({id: 'remotalk.channel_invite.hospital.select', defaultMessage: 'Select Hospital'}) : 'Select Hospital';
+            result.hospital_id = [{value: 0, label}].concat(this.props.hospitals);
         }
-        if (this.props.departments.length > 1) {
-            result.department_id = [{
-                value: 0,
-                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.department.select', defaultMessage: 'Select Department'}),
-            }].concat(this.props.departments);
+        if (this.props.departments && this.props.departments.length > 1) {
+            const label = this.props.intl ? this.props.intl.formatMessage({id: 'remotalk.channel_invite.department.select', defaultMessage: 'Select Department'}) : 'Select Department';
+            result.department_id = [{value: 0, label}].concat(this.props.departments);
         }
-        if (this.props.professions.length > 1) {
-            result.profession_id = [{
-                value: 0,
-                label: this.props.intl.formatMessage({id: 'remotalk.channel_invite.profession.select', defaultMessage: 'Select Profession'}),
-            }].concat(this.props.professions);
+        if (this.props.professions && this.props.professions.length > 1) {
+            const label = this.props.intl ? this.props.intl.formatMessage({id: 'remotalk.channel_invite.profession.select', defaultMessage: 'Select Profession'}) : 'Select Profession';
+            result.profession_id = [{value: 0, label}].concat(this.props.professions);
         }
         return result;
     };
 
     // For RemoTalk plugin
-    private loadStaffSummaries = async (users: UserProfile[] | undefined) => {
+    private loadStaffSummaries = async () => {
+        if (!this.props.actions.getStaffSummaries) {
+            return;
+        }
+        const {users} = this.props;
         if (!this.props.remotalkPluginEnabled || !users) {
             return;
         }
-        const idsToFetch = users.map((x) => x.id).filter((x) => Boolean(!this.props.staffSummaries[x]));
+        const idsToFetch = users.map((x) => x.id).filter((x) => Boolean(!this.props.staffSummaries || !this.props.staffSummaries[x]));
         if (idsToFetch.length === 0) {
             return;
         }
@@ -211,6 +206,9 @@ class MemberListTeam extends React.PureComponent<Props, State> {
 
     // For RemoTalk plugin
     private onFilterChange = async (value: {[key: string]: number | undefined}) => {
+        if (!this.props.actions.searchFilteredUserIds) {
+            return;
+        }
         const params = {
             hospital_id: value.hospital_id,
             department_id: value.department_id,
@@ -261,6 +259,15 @@ class MemberListTeam extends React.PureComponent<Props, State> {
             }
         }
 
+        // For RemoTalk plugin
+        const extraInfo: {[key: string]: string[]} = {};
+        if (this.props.staffSummaries && this.props.remotalkPluginEnabled) {
+            for (const [key, summary] of Object.entries(this.props.staffSummaries)) {
+                const info = [summary.hospital, summary.department, summary.profession].filter((x) => Boolean(x));
+                extraInfo[key] = [info.join(' / ')];
+            }
+        }
+
         return (
             <SearchableUserList
                 users={usersToDisplay}
@@ -277,9 +284,8 @@ class MemberListTeam extends React.PureComponent<Props, State> {
                 customFilterValue={this.state.filterParams}
                 handleCustomFilterChange={this.onFilterChange}
                 customFilterStyle={{marginBottom: '0.5rem'}}
+                extraInfo={extraInfo}
             />
         );
     }
 }
-
-export default injectIntl(MemberListTeam);

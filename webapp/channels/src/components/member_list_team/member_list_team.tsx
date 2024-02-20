@@ -108,7 +108,6 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        this.loadStaffSummaries();
         if (prevProps.searchTerm !== this.props.searchTerm) {
             clearTimeout(this.searchTimeoutId);
 
@@ -145,6 +144,11 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
             );
 
             this.searchTimeoutId = searchTimeoutId;
+        }
+
+        // For RemoTalk plugin
+        if (prevProps.users.length !== this.props.users.length) {
+            this.loadStaffSummaries();
         }
     }
 

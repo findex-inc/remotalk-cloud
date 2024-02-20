@@ -14,16 +14,28 @@ import ProfilePicture from 'components/profile_picture';
 import BotTag from 'components/widgets/tag/bot_tag';
 import GuestTag from 'components/widgets/tag/guest_tag';
 
-import {displayEntireNameForUser} from 'utils/utils';
+import {displayEntireNameForUser, getDisplayName} from 'utils/utils';
+
+// For RemoTalk plugin
+type StaffSummary = {
+    hospital?: string;
+    department?: string;
+    profession?: string;
+};
 
 type Props = {
     currentUserId: string;
     option: UserProfile;
     status: string;
+
+    // For RemoTalk plugin
+    remotalkPluginEnabled?: boolean;
+    staffSummaries?: {[key: string]: StaffSummary};
+    hideUsername?: boolean;
 };
 
 export default function UserDetails(props: Props): JSX.Element {
-    const {currentUserId, option, status} = props;
+    const {currentUserId, option, status, remotalkPluginEnabled, staffSummaries, hideUsername} = props;
     const {
         id,
         delete_at: deleteAt,
@@ -31,7 +43,7 @@ export default function UserDetails(props: Props): JSX.Element {
         last_picture_update: lastPictureUpdate,
     } = option;
 
-    const displayName = displayEntireNameForUser(option);
+    const displayName = hideUsername ? getDisplayName(option) : displayEntireNameForUser(option);
 
     let modalName: React.ReactNode = displayName;
     if (option.id === currentUserId) {
@@ -53,6 +65,17 @@ export default function UserDetails(props: Props): JSX.Element {
                     displayname: displayName,
                 }}
             />
+        );
+    }
+
+    // For RemoTalk plugin
+    let staffDetail: JSX.Element | null = null;
+    if (!isBot && remotalkPluginEnabled && staffSummaries && staffSummaries[id]) {
+        const info = [staffSummaries[id].hospital, staffSummaries[id].department, staffSummaries[id].profession];
+        staffDetail = (
+            <div className='more-modal__description'>
+                {info.filter((x) => Boolean(x)).join(' / ')}
+            </div>
         );
     }
 
@@ -80,9 +103,12 @@ export default function UserDetails(props: Props): JSX.Element {
                     />
                 </div>
                 {!isBot && (
-                    <div className='more-modal__description'>
-                        {option.email}
-                    </div>
+                    <>
+                        <div className='more-modal__description'>
+                            {option.email}
+                        </div>
+                        {staffDetail}
+                    </>
                 )}
             </div>
         </>

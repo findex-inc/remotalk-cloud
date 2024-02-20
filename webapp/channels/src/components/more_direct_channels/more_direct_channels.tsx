@@ -167,9 +167,6 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
                         ]);
                         if (profilesData) {
                             this.props.actions.loadStatusesForProfilesList(profilesData);
-
-                            // For RemoTalk plugin
-                            await this.loadStaffSummaries(profilesData);
                         }
                         if (groupChannelsData) {
                             this.props.actions.loadProfilesForGroupChannels(groupChannelsData);
@@ -186,6 +183,9 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
             prevProps.users.length !== this.props.users.length
         ) {
             this.props.actions.loadProfilesMissingStatus(this.props.users);
+
+            // For RemoTalk plugin
+            this.loadStaffSummaries();
         }
     }
 
@@ -321,10 +321,11 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
     };
 
     // For RemoTalk plugin
-    private loadStaffSummaries = async (users: UserProfile[] | undefined) => {
-        if (!this.props.remotalkPluginEnabled || !users || !this.props.actions.getStaffSummaries) {
+    private loadStaffSummaries = async () => {
+        if (!this.props.remotalkPluginEnabled || !this.props.actions.getStaffSummaries) {
             return;
         }
+        const {users} = this.props;
         const idsToFetch = users.map((x) => x.id).filter((x) => Boolean(!this.props.staffSummaries || !this.props.staffSummaries[x]));
         if (idsToFetch.length === 0) {
             return;

@@ -82,6 +82,7 @@ export type Props = {
 
     // For RemoTalk plugin
     remotalkPluginEnabled: boolean;
+    hideUsername: boolean;
     hospitals: FilterOption[];
     departments: FilterOption[];
     professions: FilterOption[];
@@ -520,7 +521,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                                 {staffSummary}
                                 {option.is_bot && <BotTag/>}
                                 {isGuest(option.roles) && <GuestTag className='popoverlist'/>}
-                                {displayName === option.username ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
+                                {displayName === option.username || this.props.hideUsername ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
                                 <UserMappingSpan
                                     className='light'
                                 >

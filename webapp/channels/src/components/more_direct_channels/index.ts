@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import type {IntlShape} from 'react-intl';
+import {injectIntl} from 'react-intl';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
@@ -39,6 +41,7 @@ import MoreDirectChannels from './more_direct_channels';
 
 type OwnProps = {
     isExistingChannel: boolean;
+    intl: IntlShape;
 }
 
 const makeMapStateToProps = () => {
@@ -90,6 +93,7 @@ const makeMapStateToProps = () => {
             totalCount: stats.total_users_count ?? 0,
 
             // For RemoTalk plugin
+            intl: ownProps.intl,
             remotalkPluginEnabled,
             staffSummaries,
             hospitals,
@@ -121,4 +125,5 @@ function mapDispatchToProps(dispatch: Dispatch) {
     };
 }
 
-export default connect(makeMapStateToProps, mapDispatchToProps)(MoreDirectChannels);
+const connected = connect(makeMapStateToProps, mapDispatchToProps)(MoreDirectChannels);
+export default injectIntl(connected);

@@ -54,9 +54,12 @@ type Props = {
     index?: number;
     totalUsers?: number;
     userCount?: number;
+
+    // For RemoTalk plugin
+    hideUsername?: boolean;
 };
 
-const UserListRow = ({user, status, extraInfo = [], actions = [], actionProps, actionUserProps = {}, index, totalUsers, userCount}: Props) => {
+const UserListRow = ({user, status, extraInfo = [], actions = [], actionProps, actionUserProps = {}, index, totalUsers, userCount, hideUsername}: Props) => {
     let buttons = null;
     if (actions) {
         buttons = actions.map((Action, actionIndex) => {
@@ -77,7 +80,7 @@ const UserListRow = ({user, status, extraInfo = [], actions = [], actionProps, a
     let emailProp: ReactNode = user.email;
     let emailStyle = 'more-modal__description';
     let statusProp: string | undefined;
-    if (extraInfo && extraInfo.length > 0) {
+    if (extraInfo && extraInfo.length > 0 && user.email) {
         emailProp = (
             <FormattedMarkdownMessage
                 id='admin.user_item.emailTitle'
@@ -130,10 +133,10 @@ const UserListRow = ({user, status, extraInfo = [], actions = [], actionProps, a
                     >
                         <UserProfile
                             userId={user.id}
-                            displayUsername={true}
+                            displayUsername={!hideUsername}
                         />
                         {
-                            (user.first_name || user.last_name || user.nickname) && (
+                            Boolean(!hideUsername && (user.first_name || user.last_name || user.nickname)) && (
                                 <>
                                     <Nbsp/>
                                     {'-'}

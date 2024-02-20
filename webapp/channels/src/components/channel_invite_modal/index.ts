@@ -25,7 +25,7 @@ import {addUsersToChannel} from 'actions/channel_actions';
 import {loadStatusesForProfilesList} from 'actions/status_actions';
 import {searchAssociatedGroupsForReference} from 'actions/views/group';
 import {closeModal} from 'actions/views/modals';
-import {getDepartments, getHospitals, getProfessions, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
+import {getDepartments, getHospitals, getProfessions, getHideUsername, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -87,6 +87,7 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
 
         // For RemoTalk plugin
         const remotalkPluginEnabled = isRemoTalkPluginEnabled(state);
+        const hideUsername = getHideUsername(state);
         const staffSummaries = selectStaffSummaries(state);
         const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
         const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
@@ -107,6 +108,7 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
 
             // For RemoTalk plugin
             remotalkPluginEnabled,
+            hideUsername,
             hospitals,
             departments,
             professions,

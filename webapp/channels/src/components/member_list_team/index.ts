@@ -1,6 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import type {IntlShape} from 'react-intl';
+import {injectIntl} from 'react-intl';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
@@ -24,6 +26,7 @@ import MemberListTeam from './member_list_team';
 
 type Props = {
     teamId: string;
+    intl: IntlShape;
 }
 
 function mapStateToProps(state: GlobalState, ownProps: Props) {
@@ -56,6 +59,7 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
         canManageTeamMembers,
 
         // For RemoTalk plugin
+        intl: ownProps.intl,
         remotalkPluginEnabled,
         staffSummaries,
         hospitals,
@@ -82,4 +86,5 @@ function mapDispatchToProps(dispatch: Dispatch) {
     };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(MemberListTeam);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MemberListTeam);
+export default injectIntl(connected);

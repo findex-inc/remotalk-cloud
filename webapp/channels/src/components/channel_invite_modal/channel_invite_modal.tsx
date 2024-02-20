@@ -81,11 +81,12 @@ export type Props = {
     isGroupsEnabled: boolean;
 
     // For RemoTalk plugin
-    remotalkPluginEnabled: boolean;
-    hospitals: FilterOption[];
-    departments: FilterOption[];
-    professions: FilterOption[];
-    staffSummaries: {[key: string]: StaffSummary};
+    remotalkPluginEnabled?: boolean;
+    hideUsername?: boolean;
+    hospitals?: FilterOption[];
+    departments?: FilterOption[];
+    professions?: FilterOption[];
+    staffSummaries?: {[key: string]: StaffSummary};
 
     actions: {
         addUsersToChannel: (channelId: string, userIds: string[]) => Promise<ActionResult>;
@@ -99,8 +100,8 @@ export type Props = {
         getTeamMembersByIds: (teamId: string, userIds: string[]) => Promise<ActionResult>;
 
         // For RemoTalk plugin
-        getStaffSummaries: (userIds: string[]) => Promise<ActionResult>;
-        searchFilteredUserIds: (params: FilterParams) => Promise<ActionResult<string[]>>;
+        getStaffSummaries?: (userIds: string[]) => Promise<ActionResult>;
+        searchFilteredUserIds?: (params: FilterParams) => Promise<ActionResult<string[]>>;
     };
 }
 
@@ -414,6 +415,9 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
 
     // For RemoTalk plugin
     private getStaffSummaryText = (userId: string) => {
+        if (!this.props.staffSummaries) {
+            return null;
+        }
         const summary = this.props.staffSummaries[userId];
         if (!summary) {
             return '';
@@ -432,30 +436,27 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     // For RemoTalk plugin
     private getTenantFilterOptions = () => {
         const result: {[key: string]: FilterOption[]} = {};
-        if (this.props.hospitals.length > 1) {
-            result.hospital_id = [{
-                value: 0,
-                label: localizeMessage('remotalk.channel_invite.hospital.select', 'Select Hospital'),
-            }].concat(this.props.hospitals);
+        if (this.props.hospitals && this.props.hospitals.length > 1) {
+            const label = localizeMessage('remotalk.channel_invite.hospital.select', 'Select Hospital');
+            result.hospital_id = [{value: 0, label}].concat(this.props.hospitals);
         }
-        if (this.props.departments.length > 1) {
-            result.department_id = [{
-                value: 0,
-                label: localizeMessage('remotalk.channel_invite.department.select', 'Select Department'),
-            }].concat(this.props.departments);
+        if (this.props.departments && this.props.departments.length > 1) {
+            const label = localizeMessage('remotalk.channel_invite.department.select', 'Select Department');
+            result.department_id = [{value: 0, label}].concat(this.props.departments);
         }
-        if (this.props.professions.length > 1) {
-            result.profession_id = [{
-                value: 0,
-                label: localizeMessage('remotalk.channel_invite.profession.select', 'Select Profession'),
-            }].concat(this.props.professions);
+        if (this.props.professions && this.props.professions.length > 1) {
+            const label = localizeMessage('remotalk.channel_invite.profession.select', 'Select Profession');
+            result.profession_id = [{value: 0, label}].concat(this.props.professions);
         }
         return result;
     };
 
     // For RemoTalk plugin
     private loadStaffSummaries = async (userIds: string[]) => {
-        const idsToFetch = userIds.filter((x) => Boolean(!this.props.staffSummaries[x]));
+        if (!this.props.actions.getStaffSummaries) {
+            return;
+        }
+        const idsToFetch = userIds.filter((x) => Boolean(!this.props.staffSummaries || !this.props.staffSummaries[x]));
         if (idsToFetch.length === 0) {
             return;
         }
@@ -464,6 +465,9 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
 
     // For RemoTalk plugin
     private onFilterChange = async (value: {[key: string]: number | undefined}) => {
+        if (!this.props.actions.searchFilteredUserIds) {
+            return;
+        }
         const params = {
             hospital_id: value.hospital_id,
             department_id: value.department_id,
@@ -520,7 +524,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                                 {staffSummary}
                                 {option.is_bot && <BotTag/>}
                                 {isGuest(option.roles) && <GuestTag className='popoverlist'/>}
-                                {displayName === option.username ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
+                                {displayName === option.username || this.props.hideUsername ? null : <UsernameSpan className='ml-2 light'>{'@'}{option.username}</UsernameSpan>}
                                 <UserMappingSpan
                                     className='light'
                                 >

@@ -183,6 +183,13 @@ export const getUserProfileItemsToHide = createSelector(
     },
 );
 
+export const getHideUsername = createSelector(
+    'getHideUsername',
+    isRemoTalkPluginEnabled,
+    getRemoTalkPluginConfig,
+    (enabled, config) => Boolean(enabled && config?.HideUsername),
+);
+
 export function getTenantInfo(s: any) {
     const tenant = getRemoTalkPluginState(s)?.tenant;
     if (!tenant) {

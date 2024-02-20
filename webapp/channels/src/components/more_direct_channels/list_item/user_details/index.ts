@@ -7,6 +7,8 @@ import type {UserProfile} from '@mattermost/types/users';
 
 import {getCurrentUserId, getStatusForUserId} from 'mattermost-redux/selectors/entities/users';
 
+import {getHideUsername, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
+
 import type {GlobalState} from 'types/store';
 
 import UserDetails from './user_details';
@@ -19,6 +21,11 @@ function mapStateToProps(state: GlobalState, ownProps: OwnProps) {
     return {
         currentUserId: getCurrentUserId(state),
         status: getStatusForUserId(state, ownProps.option.id),
+
+        // For RemoTalk plugin
+        remotalkPluginEnabled: isRemoTalkPluginEnabled(state),
+        staffSummaries: selectStaffSummaries(state),
+        hideUsername: getHideUsername(state),
     };
 }
 

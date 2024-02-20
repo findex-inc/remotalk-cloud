@@ -490,7 +490,7 @@ export function submitInteractiveDialog(submission: DialogSubmission): ActionFun
 
 // For RemoTalk plugin
 
-export function getStaffSummaries(userIds: string[]): NewActionFuncAsync<{
+export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
     [key: string]: {
         user_id: string;
         psc_id?: number;
@@ -526,7 +526,7 @@ export function searchFilteredUserIds(params: {
     hospital_id: number | undefined;
     department_id: number | undefined;
     profession_id: number | undefined;
-}): NewActionFuncAsync<string[]> {
+}): ActionFuncAsync<string[]> {
     return async (dispatch, getState) => {
         if (Object.values(params).every((x) => !x)) {
             return {data: []};

@@ -283,6 +283,14 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
         });
     };
 
+    // For RemoTalk plugin
+    private isCustomFilterApplied = () => {
+        if (!this.props.customFilterValue) {
+            return false;
+        }
+        return Object.values(this.props.customFilterValue).some((x) => Boolean(x));
+    };
+
     MultiValueRemove = ({children, innerProps}: any) => (
         <div {...innerProps}>
             {children || <CloseCircleSolidIcon/>}
@@ -412,7 +420,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
         let multiSelectList;
 
         if (this.props.saveButtonPosition === 'bottom') {
-            if (this.state.input) {
+            if (this.state.input || this.isCustomFilterApplied()) {
                 multiSelectList = (
                     <MultiSelectList
                         ref={this.listRef}

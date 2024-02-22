@@ -30,6 +30,9 @@ export type Props<T extends Value> = {
     page: number;
     perPage: number;
     customNoOptionsMessage?: React.ReactNode;
+
+    // For RemoTalk plugin
+    onCloseButtonClick?: () => void;
 }
 
 type State = {
@@ -238,6 +241,20 @@ export default class MultiSelectList<T extends Value> extends React.PureComponen
                 className='multi-select__wrapper'
                 aria-live='polite'
             >
+                {
+
+                    // For RemoTalk plugin
+                    this.props.onCloseButtonClick ? (
+                        <button
+                            className='btn btn-transparent'
+                            aria-label='Close'
+                            style={{fontSize: '30px', fontWeight: 400}}
+                            onClick={this.props.onCloseButtonClick}
+                        >
+                            <span aria-hidden={true}>{'×'}</span>
+                        </button>
+                    ) : null
+                }
                 {renderOutput}
             </div>
         );

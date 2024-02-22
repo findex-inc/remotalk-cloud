@@ -272,15 +272,19 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
             users = [...users, ...Object.values(this.props.includeUsers)];
         }
 
-        // For RemoTalk plugin
-        if (this.isStaffFilterApplied()) {
-            users = this.filterWithIncludeUserIds(users, this.state.filteredUserIds);
-        }
-
         const groupsAndUsers = [
             ...filterGroupsMatchingTerm(this.props.groups, this.state.term) as GroupValue[],
             ...users,
         ].sort(sortUsersAndGroups);
+
+        // For RemoTalk plugin
+        if (this.isStaffFilterApplied()) {
+            const filteredOptions = [
+                ...dmUsers,
+                ...groupsAndUsers,
+            ].filter((x) => this.state.filteredUserIds.includes(x.id)).slice(0, MAX_USERS);
+            return Array.from(new Set(filteredOptions));
+        }
 
         const optionValues = [
             ...dmUsers,
@@ -489,11 +493,6 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     // For RemoTalk plugin
     private isStaffFilterApplied = () => {
         return Object.values(this.state.filterParams).some((x) => Boolean(x));
-    };
-
-    // For RemoTalk plugin
-    private filterWithIncludeUserIds = (users: UserProfile[], includeUserIds: string[]) => {
-        return users.filter((user) => includeUserIds.includes(user.id)) as UserProfileValue[];
     };
 
     // For RemoTalk plugin

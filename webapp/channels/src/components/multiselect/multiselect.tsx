@@ -79,6 +79,9 @@ export type State = {
     a11yActive: boolean;
     input: string;
     page: number;
+
+    // For RemoTalk plugin
+    closeClicked: boolean;
 }
 
 const KeyCodes = Constants.KeyCodes;
@@ -103,6 +106,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             a11yActive: false,
             page: 0,
             input: '',
+            closeClicked: false,
         };
     }
 
@@ -215,7 +219,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             return;
         }
 
-        this.setState({input});
+        this.setState({input, closeClicked: false});
 
         if (this.listRef.current) {
             if (input === '') {
@@ -281,6 +285,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             ...this.props.customFilterValue,
             [key]: v,
         });
+        this.setState({closeClicked: false});
     };
 
     // For RemoTalk plugin
@@ -289,6 +294,14 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
             return false;
         }
         return Object.values(this.props.customFilterValue).some((x) => Boolean(x));
+    };
+
+    // For RemoTalk plugin
+    private onCloseButtonClick = () => {
+        if (!this.props.customFilterValue) {
+            return;
+        }
+        this.setState({closeClicked: true});
     };
 
     MultiValueRemove = ({children, innerProps}: any) => (
@@ -420,7 +433,7 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
         let multiSelectList;
 
         if (this.props.saveButtonPosition === 'bottom') {
-            if (this.state.input || this.isCustomFilterApplied()) {
+            if ((this.state.input || this.isCustomFilterApplied()) && !this.state.closeClicked) {
                 multiSelectList = (
                     <MultiSelectList
                         ref={this.listRef}
@@ -436,6 +449,9 @@ export class MultiSelect<T extends Value> extends React.PureComponent<Props<T>, 
                         query={this.state.input}
                         selectedItemRef={this.props.selectedItemRef}
                         customNoOptionsMessage={this.props.customNoOptionsMessage || undefined}
+
+                        // For RemoTalk plugin
+                        onCloseButtonClick={this.isCustomFilterApplied() ? this.onCloseButtonClick : undefined}
                     />
                 );
             }

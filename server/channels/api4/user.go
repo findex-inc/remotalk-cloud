@@ -1056,11 +1056,6 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		props.Limit = model.UserSearchDefaultLimit
 	}
 
-	if props.Term == "" {
-		c.SetInvalidParam("term")
-		return
-	}
-
 	if props.TeamId == "" && props.NotInChannelId != "" {
 		c.SetInvalidParam("team_id")
 		return
@@ -1116,6 +1111,7 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		Roles:            props.Roles,
 		ChannelRoles:     props.ChannelRoles,
 		TeamRoles:        props.TeamRoles,
+		ListOfUserIds:    props.UserIds,
 	}
 
 	if c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {

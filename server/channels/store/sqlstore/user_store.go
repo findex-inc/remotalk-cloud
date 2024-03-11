@@ -1650,6 +1650,10 @@ func (us SqlUserStore) performSearch(query sq.SelectBuilder, term string, option
 		query = generateSearchQuery(query, strings.Fields(term), searchType, isPostgreSQL)
 	}
 
+	if len(options.ListOfUserIds) > 0 {
+		query = query.Where(sq.Eq{"u.Id": options.ListOfUserIds})
+	}
+
 	query = applyViewRestrictionsFilter(query, options.ViewRestrictions, true)
 
 	queryString, args, err := query.ToSql()

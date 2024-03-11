@@ -266,3 +266,21 @@ export const selectStaffSummaries = createSelector(
         return result;
     },
 );
+
+export const getFilterInfo = createSelector(
+    'getFilterInfo',
+    (s: any) => getRemoTalkPluginState(s),
+    (s) => s?.filter,
+);
+
+export const getFilteredUserIds = createSelector(
+    'getFilteredUserIds',
+    getFilterInfo,
+    (info) => {
+        const result = info?.userIds;
+        if (!result || !Array.isArray(result)) {
+            return [] as string[];
+        }
+        return result as string[];
+    },
+);

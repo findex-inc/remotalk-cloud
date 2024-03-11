@@ -33,7 +33,7 @@ import {openDirectChannelToUserId, openGroupChannelToUserIds} from 'actions/chan
 import {loadStatusesForProfilesList, loadProfilesMissingStatus} from 'actions/status_actions';
 import {loadProfilesForGroupChannels} from 'actions/user_actions';
 import {setModalSearchTerm} from 'actions/views/search';
-import {getDepartments, getHospitals, getProfessions, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
+import {getDepartments, getFilteredUserIds, getHospitals, getProfessions, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -81,6 +81,7 @@ const makeMapStateToProps = () => {
         const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
         const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
         const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
+        const filteredUserIds = getFilteredUserIds(state);
 
         return {
             currentTeamId: team.id,
@@ -99,6 +100,7 @@ const makeMapStateToProps = () => {
             hospitals,
             departments,
             professions,
+            filteredUserIds,
         };
     };
 };

@@ -45,9 +45,9 @@ type StaffSummary = {
     profession?: string;
 };
 type FilterParams = {
-    hospital_id: number | undefined;
-    department_id: number | undefined;
-    profession_id: number | undefined;
+    hospital_id?: number | undefined;
+    department_id?: number | undefined;
+    profession_id?: number | undefined;
 }
 
 type UserProfileValue = Value & UserProfile;
@@ -87,6 +87,7 @@ export type Props = {
     departments?: FilterOption[];
     professions?: FilterOption[];
     staffSummaries?: {[key: string]: StaffSummary};
+    filteredUserIds?: string[];
 
     actions: {
         addUsersToChannel: (channelId: string, userIds: string[]) => Promise<ActionResult>;
@@ -118,7 +119,6 @@ type State = {
 
     // For RemoTalk plugin
     filterParams: {[key: string]: number | undefined};
-    filteredUserIds: string[];
 }
 
 const UsernameSpan = styled.span`
@@ -154,7 +154,6 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
 
             // For RemoTalk plugin
             filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
-            filteredUserIds: [],
         } as State;
     }
 
@@ -223,31 +222,30 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         this.props.actions.loadStatusesForProfilesList(this.props.profilesInCurrentChannel);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public async componentDidUpdate(prevProps: Props, prevState: State) {
-        if (prevState.term !== this.state.term || !this.equalFilter(prevState, this.state)) {
-            const values = this.getOptions();
-            const userIds: string[] = [];
+        const values = this.getOptions();
+        const userIds: string[] = [];
 
-            for (let index = 0; index < values.length; index++) {
-                const newValue = values[index];
-                if (this.isUser(newValue)) {
-                    userIds.push(newValue.id);
-                } else if (newValue.member_ids) {
-                    userIds.push(...newValue.member_ids);
+        for (let index = 0; index < values.length; index++) {
+            const newValue = values[index];
+            if (this.isUser(newValue)) {
+                userIds.push(newValue.id);
+            } else if (newValue.member_ids) {
+                userIds.push(...newValue.member_ids);
+            }
+        }
+
+        if (!isEqual(values, this.state.groupAndUserOptions)) {
+            if (userIds.length > 0) {
+                this.props.actions.getTeamMembersByIds(this.props.channel.team_id, userIds);
+
+                // For RemoTalk plugin
+                if (this.props.remotalkPluginEnabled) {
+                    this.loadStaffSummaries(userIds);
                 }
             }
-
-            if (!isEqual(values, this.state.groupAndUserOptions)) {
-                if (userIds.length > 0) {
-                    this.props.actions.getTeamMembersByIds(this.props.channel.team_id, userIds);
-
-                    // For RemoTalk plugin
-                    if (this.props.remotalkPluginEnabled) {
-                        this.loadStaffSummaries(userIds);
-                    }
-                }
-                this.setState({groupAndUserOptions: values});
-            }
+            this.setState({groupAndUserOptions: values});
         }
     }
 
@@ -278,11 +276,12 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         ].sort(sortUsersAndGroups);
 
         // For RemoTalk plugin
-        if (this.isStaffFilterApplied()) {
+        if (this.isStaffFilterApplied(this.state.filterParams) && this.props.filteredUserIds) {
+            const ids = this.props.filteredUserIds;
             const filteredOptions = [
                 ...dmUsers,
                 ...groupsAndUsers,
-            ].filter((x) => this.state.filteredUserIds.includes(x.id)).slice(0, MAX_USERS);
+            ].filter((x) => ids.includes(x.id)).slice(0, MAX_USERS);
             return Array.from(new Set(filteredOptions));
         }
 
@@ -367,23 +366,38 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
         });
     };
 
-    public search = (searchTerm: string): void => {
+    public search = (searchTerm: string, filterParams?: {[key: string]: number | undefined}): void => {
         const term = searchTerm.trim();
+        const params = {
+            hospital_id: filterParams?.hospital_id,
+            department_id: filterParams?.department_id,
+            profession_id: filterParams?.profession_id,
+        };
         clearTimeout(this.searchTimeoutId);
         this.setState({
             term,
+            filterParams: params,
         });
+        this.setUsersLoadingState(true);
 
         this.searchTimeoutId = window.setTimeout(
             async () => {
-                if (!term) {
+                if (!term && !this.isStaffFilterApplied(params)) {
+                    this.setUsersLoadingState(false);
                     return;
+                }
+
+                let userIds: string[] | undefined;
+                if (this.props.actions.searchFilteredUserIds && this.isStaffFilterApplied(params)) {
+                    const {data} = await this.props.actions.searchFilteredUserIds(params);
+                    userIds = data;
                 }
 
                 const options = {
                     team_id: this.props.channel.team_id,
                     not_in_channel_id: this.props.channel.id,
                     group_constrained: this.props.channel.group_constrained,
+                    user_ids: userIds && userIds.length > 0 ? userIds : undefined,
                 };
 
                 const opts = {
@@ -474,30 +488,8 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
     };
 
     // For RemoTalk plugin
-    private onFilterChange = async (value: {[key: string]: number | undefined}) => {
-        if (!this.props.actions.searchFilteredUserIds) {
-            return;
-        }
-        const params = {
-            hospital_id: value.hospital_id,
-            department_id: value.department_id,
-            profession_id: value.profession_id,
-        };
-        const result = await this.props.actions.searchFilteredUserIds(params);
-        this.setState({
-            filterParams: params,
-            filteredUserIds: result.data ?? [],
-        });
-    };
-
-    // For RemoTalk plugin
-    private isStaffFilterApplied = () => {
-        return Object.values(this.state.filterParams).some((x) => Boolean(x));
-    };
-
-    // For RemoTalk plugin
-    private equalFilter = (a: State, b: State) => {
-        return Object.keys(a.filterParams).every((k) => a.filterParams[k] === b.filterParams[k]);
+    private isStaffFilterApplied = (params: {[key: string]: number | undefined}) => {
+        return Object.values(params).some((x) => Boolean(x));
     };
 
     renderOption = (option: UserProfileValue | GroupValue, isSelected: boolean, onAdd: (option: UserProfileValue | GroupValue) => void, onMouseMove: (option: UserProfileValue | GroupValue) => void) => {
@@ -631,7 +623,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                 saveButtonPosition={'bottom'}
                 perPage={USERS_PER_PAGE}
                 handlePageChange={this.handlePageChange}
-                handleInput={this.search}
+                handleInput={(term) => this.search(term, this.state.filterParams)}
                 handleDelete={this.handleDelete}
                 handleAdd={this.addValue}
                 handleSubmit={this.handleSubmit}
@@ -650,7 +642,7 @@ export class ChannelInviteModal extends React.PureComponent<Props, State> {
                 // For RemoTalk plugin
                 customFilterOptions={this.getTenantFilterOptions()}
                 customFilterValue={this.state.filterParams}
-                handleCustomFilterChange={this.onFilterChange}
+                handleCustomFilterChange={async (params) => this.search(this.state.term, params)}
                 customFilterStyle={{padding: '0.5rem 3.2rem'}}
             />
         );

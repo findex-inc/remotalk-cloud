@@ -48,6 +48,7 @@ type Props = {
     departments?: FilterOption[];
     professions?: FilterOption[];
     staffSummaries?: {[key: string]: StaffSummary};
+    filteredUserIds?: string[];
 
     actions: {
         getTeamMembers: (teamId: string, page?: number, perPage?: number, options?: GetTeamMembersOpts) => Promise<ActionResult<TeamMembership[]>>;
@@ -69,7 +70,6 @@ type State = {
 
     // For RemoTalk plugin
     filterParams: {[key: string]: number | undefined};
-    filteredUserIds: string[];
 }
 
 export default class MemberListTeam extends React.PureComponent<Props, State> {
@@ -85,7 +85,6 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
             // For RemoTalk plugin
             filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
-            filteredUserIds: [],
         };
     }
 
@@ -107,12 +106,17 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
         this.props.actions.setModalSearchTerm('');
     }
 
-    componentDidUpdate(prevProps: Props) {
-        if (prevProps.searchTerm !== this.props.searchTerm) {
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        if (prevProps.searchTerm !== this.props.searchTerm || !this.equalFilter(prevState.filterParams, this.state.filterParams)) {
             clearTimeout(this.searchTimeoutId);
 
+            const params = {
+                hospital_id: this.state.filterParams.hospital_id,
+                department_id: this.state.filterParams.department_id,
+                profession_id: this.state.filterParams.profession_id,
+            };
             const searchTerm = this.props.searchTerm;
-            if (searchTerm === '') {
+            if (searchTerm === '' && !this.isStaffFilterApplied(params)) {
                 this.loadComplete();
                 this.searchTimeoutId = 0;
                 return;
@@ -124,8 +128,19 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
                         loadStatusesForProfilesList,
                         loadTeamMembersForProfilesList,
                         searchProfiles,
+                        searchFilteredUserIds,
                     } = this.props.actions;
-                    const {data} = await searchProfiles(searchTerm, {team_id: this.props.currentTeamId});
+
+                    // For RemoTalk plugin
+                    let userIds: string[] | undefined;
+                    if (searchFilteredUserIds && this.isStaffFilterApplied(params)) {
+                        const {data} = await searchFilteredUserIds(params);
+                        userIds = data;
+                    }
+                    const {data} = await searchProfiles(searchTerm, {
+                        team_id: this.props.currentTeamId,
+                        user_ids: userIds && userIds.length > 0 ? userIds : undefined,
+                    });
 
                     if (searchTimeoutId !== this.searchTimeoutId) {
                         return;
@@ -147,9 +162,7 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
         }
 
         // For RemoTalk plugin
-        if (prevProps.users.length !== this.props.users.length) {
-            this.loadStaffSummaries();
-        }
+        this.loadStaffSummaries();
     }
 
     loadComplete = () => {
@@ -210,25 +223,29 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
     // For RemoTalk plugin
     private onFilterChange = async (value: {[key: string]: number | undefined}) => {
-        if (!this.props.actions.searchFilteredUserIds) {
-            return;
-        }
         const params = {
             hospital_id: value.hospital_id,
             department_id: value.department_id,
             profession_id: value.profession_id,
         };
-        const result = await this.props.actions.searchFilteredUserIds(params);
         this.setState({
             filterParams: params,
-            filteredUserIds: result.data ?? [],
         });
     };
 
     // For RemoTalk plugin
     private hitTenantFilter = (user: UserProfile) => {
-        return Object.values(this.state.filterParams).every((x) => !x) ||
-            this.state.filteredUserIds.includes(user.id);
+        return !this.isStaffFilterApplied(this.state.filterParams) || !this.props.filteredUserIds || this.props.filteredUserIds.includes(user.id);
+    };
+
+    // For RemoTalk plugin
+    private equalFilter = (a: {[key: string]: number | undefined}, b: {[key: string]: number | undefined}) => {
+        return Object.keys(a).every((k) => a[k] === b[k]);
+    };
+
+    // For RemoTalk plugin
+    private isStaffFilterApplied = (params: {[key: string]: number | undefined}) => {
+        return Object.values(params).some((x) => Boolean(x));
     };
 
     render() {

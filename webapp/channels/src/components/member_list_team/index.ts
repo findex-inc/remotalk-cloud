@@ -18,7 +18,7 @@ import {getProfilesInCurrentTeam, searchProfilesInCurrentTeam} from 'mattermost-
 import {loadStatusesForProfilesList} from 'actions/status_actions';
 import {loadProfilesAndTeamMembers, loadTeamMembersForProfilesList} from 'actions/user_actions';
 import {setModalSearchTerm} from 'actions/views/search';
-import {isRemoTalkPluginEnabled, selectStaffSummaries, getHospitals, getDepartments, getProfessions} from 'selectors/plugins';
+import {isRemoTalkPluginEnabled, selectStaffSummaries, getHospitals, getDepartments, getProfessions, getFilteredUserIds} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -49,6 +49,7 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
     const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
     const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
     const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
+    const filteredUserIds = getFilteredUserIds(state);
 
     return {
         searchTerm,
@@ -65,6 +66,7 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
         hospitals,
         departments,
         professions,
+        filteredUserIds,
     };
 }
 

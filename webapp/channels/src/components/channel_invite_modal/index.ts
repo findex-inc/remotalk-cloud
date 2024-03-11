@@ -25,7 +25,7 @@ import {addUsersToChannel} from 'actions/channel_actions';
 import {loadStatusesForProfilesList} from 'actions/status_actions';
 import {searchAssociatedGroupsForReference} from 'actions/views/group';
 import {closeModal} from 'actions/views/modals';
-import {getDepartments, getHospitals, getProfessions, getHideUsername, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
+import {getDepartments, getHospitals, getProfessions, getHideUsername, isRemoTalkPluginEnabled, selectStaffSummaries, getFilteredUserIds} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -92,6 +92,7 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
         const hospitals = getHospitals(state).map((x) => ({value: x.id, label: x.name}));
         const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
         const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
+        const filteredUserIds = getFilteredUserIds(state);
 
         return {
             profilesNotInCurrentChannel,
@@ -113,6 +114,7 @@ function makeMapStateToProps(initialState: GlobalState, initialProps: OwnProps) 
             departments,
             professions,
             staffSummaries,
+            filteredUserIds,
         };
     };
 }

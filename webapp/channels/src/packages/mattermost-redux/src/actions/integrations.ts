@@ -523,18 +523,34 @@ export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
 }
 
 export function searchFilteredUserIds(params: {
-    hospital_id: number | undefined;
-    department_id: number | undefined;
-    profession_id: number | undefined;
+    hospital_id?: number | undefined;
+    department_id?: number | undefined;
+    profession_id?: number | undefined;
 }): ActionFuncAsync<string[]> {
     return async (dispatch, getState) => {
+        dispatch({
+            type: 'TENANT_FILTER_APPLIED',
+            data: params,
+        });
         if (Object.values(params).every((x) => !x)) {
+            dispatch({
+                type: 'FILTERED_USER_IDS_CHANGED',
+                data: [],
+            });
             return {data: []};
         }
         try {
             const data = await Client4.searchFilteredUserIds(params);
+            dispatch({
+                type: 'FILTERED_USER_IDS_RECEIVED',
+                data,
+            });
             return {data};
         } catch (error) {
+            dispatch({
+                type: 'FILTERED_USER_IDS_CHANGED',
+                data: [],
+            });
             forceLogoutIfNecessary(error, dispatch, getState);
 
             dispatch(logError(error));

@@ -4421,7 +4421,7 @@ export default class Client4 {
         return this.doFetch<{
             [key: string]: {
                 user_id: string;
-                psc_id?: number;
+                auth_id?: number;
                 hospital?: number;
                 department?: number;
                 profession?: number;

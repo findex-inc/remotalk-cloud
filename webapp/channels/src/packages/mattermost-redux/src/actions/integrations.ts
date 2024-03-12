@@ -493,7 +493,7 @@ export function submitInteractiveDialog(submission: DialogSubmission): ActionFun
 export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
     [key: string]: {
         user_id: string;
-        psc_id?: number;
+        auth_id?: number;
         hospital?: number;
         department?: number;
         profession?: number;

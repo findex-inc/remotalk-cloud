@@ -522,16 +522,23 @@ export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
     };
 }
 
+export function setStaffFilterParams(params: {
+    hospital_id?: number | undefined;
+    department_id?: number | undefined;
+    profession_id?: number | undefined;
+}) {
+    return {
+        type: 'TENANT_FILTER_APPLIED',
+        data: params,
+    };
+}
+
 export function searchFilteredUserIds(params: {
     hospital_id?: number | undefined;
     department_id?: number | undefined;
     profession_id?: number | undefined;
 }): ActionFuncAsync<string[]> {
     return async (dispatch, getState) => {
-        dispatch({
-            type: 'TENANT_FILTER_APPLIED',
-            data: params,
-        });
         if (Object.values(params).every((x) => !x)) {
             dispatch({
                 type: 'FILTERED_USER_IDS_CHANGED',

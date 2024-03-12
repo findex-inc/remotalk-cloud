@@ -11,6 +11,8 @@ import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
 import {getUserIdFromChannelName} from 'mattermost-redux/utils/channel_utils';
 import {filterProfilesStartingWithTerm} from 'mattermost-redux/utils/user_utils';
 
+import {getIsFilterApplied} from 'selectors/plugins';
+
 import Constants from 'utils/constants';
 
 import type {GlobalState} from 'types/store';
@@ -95,7 +97,7 @@ export function makeGetOptions(): (state: GlobalState, users: UserProfile[], val
         getUsersWithDMs,
         (state: GlobalState, users: UserProfile[], values: OptionValue[]) => getFilteredGroupChannels(state, values),
         (state: GlobalState, users: UserProfile[]) => users,
-        (state: GlobalState) => Boolean(state.views.search.modalSearch),
+        (state: GlobalState) => Boolean(state.views.search.modalSearch || getIsFilterApplied(state)),
         (usersWithDMs, filteredGroupChannels, users, isSearch) => {
             // Recent DMs (as UserProfiles) and GMs sorted by recent activity
             const recents = [...usersWithDMs, ...filteredGroupChannels].

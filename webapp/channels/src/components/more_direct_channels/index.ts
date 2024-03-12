@@ -10,7 +10,7 @@ import type {Dispatch} from 'redux';
 import type {UserProfile} from '@mattermost/types/users';
 
 import {searchGroupChannels} from 'mattermost-redux/actions/channels';
-import {getStaffSummaries, searchFilteredUserIds} from 'mattermost-redux/actions/integrations';
+import {getStaffSummaries, searchFilteredUserIds, setStaffFilterParams} from 'mattermost-redux/actions/integrations';
 import {
     getProfiles,
     getProfilesInTeam,
@@ -33,7 +33,7 @@ import {openDirectChannelToUserId, openGroupChannelToUserIds} from 'actions/chan
 import {loadStatusesForProfilesList, loadProfilesMissingStatus} from 'actions/status_actions';
 import {loadProfilesForGroupChannels} from 'actions/user_actions';
 import {setModalSearchTerm} from 'actions/views/search';
-import {getDepartments, getFilteredUserIds, getHospitals, getProfessions, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
+import {getDepartments, getFilteredUserIds, getHospitals, getIsFilterApplied, getProfessions, getStaffFilterParams, isRemoTalkPluginEnabled, selectStaffSummaries} from 'selectors/plugins';
 
 import type {GlobalState} from 'types/store';
 
@@ -82,6 +82,8 @@ const makeMapStateToProps = () => {
         const departments = getDepartments(state).map((x) => ({value: x.id, label: x.name}));
         const professions = getProfessions(state).map((x) => ({value: x.id, label: x.name}));
         const filteredUserIds = getFilteredUserIds(state);
+        const filterParams = getStaffFilterParams(state);
+        const isFilterApplied = getIsFilterApplied(state);
 
         return {
             currentTeamId: team.id,
@@ -101,6 +103,8 @@ const makeMapStateToProps = () => {
             departments,
             professions,
             filteredUserIds,
+            filterParams,
+            isFilterApplied,
         };
     };
 };
@@ -123,6 +127,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
             // For RemoTalk plugin
             getStaffSummaries,
             searchFilteredUserIds,
+            setStaffFilterParams,
         }, dispatch),
     };
 }

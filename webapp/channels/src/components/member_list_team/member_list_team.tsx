@@ -26,9 +26,9 @@ type StaffSummary = {
     profession?: string;
 };
 type FilterParams = {
-    hospital_id: number | undefined;
-    department_id: number | undefined;
-    profession_id: number | undefined;
+    hospital_id?: number | undefined;
+    department_id?: number | undefined;
+    profession_id?: number | undefined;
 }
 
 type Props = {
@@ -49,6 +49,8 @@ type Props = {
     professions?: FilterOption[];
     staffSummaries?: {[key: string]: StaffSummary};
     filteredUserIds?: string[];
+    filterParams?: FilterParams;
+    isFilterApplied?: boolean;
 
     actions: {
         getTeamMembers: (teamId: string, page?: number, perPage?: number, options?: GetTeamMembersOpts) => Promise<ActionResult<TeamMembership[]>>;
@@ -62,14 +64,12 @@ type Props = {
         // For RemoTalk plugin
         getStaffSummaries?: (userIds: string[]) => Promise<ActionResult>;
         searchFilteredUserIds?: (params: FilterParams) => Promise<ActionResult<string[]>>;
+        setStaffFilterParams?: (params: FilterParams) => void;
     };
 }
 
 type State = {
     loading: boolean;
-
-    // For RemoTalk plugin
-    filterParams: {[key: string]: number | undefined};
 }
 
 export default class MemberListTeam extends React.PureComponent<Props, State> {
@@ -82,9 +82,6 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
         this.state = {
             loading: true,
-
-            // For RemoTalk plugin
-            filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
         };
     }
 
@@ -104,19 +101,18 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
     componentWillUnmount() {
         this.props.actions.setModalSearchTerm('');
+        if (this.props.actions.setStaffFilterParams) {
+            this.props.actions.setStaffFilterParams({});
+        }
     }
 
-    componentDidUpdate(prevProps: Props, prevState: State) {
-        if (prevProps.searchTerm !== this.props.searchTerm || !this.equalFilter(prevState.filterParams, this.state.filterParams)) {
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.searchTerm !== this.props.searchTerm || !this.equalFilter(prevProps.filterParams, this.props.filterParams)) {
             clearTimeout(this.searchTimeoutId);
 
-            const params = {
-                hospital_id: this.state.filterParams.hospital_id,
-                department_id: this.state.filterParams.department_id,
-                profession_id: this.state.filterParams.profession_id,
-            };
+            const params = this.props.filterParams;
             const searchTerm = this.props.searchTerm;
-            if (searchTerm === '' && !this.isStaffFilterApplied(params)) {
+            if (searchTerm === '' && !this.props.isFilterApplied) {
                 this.loadComplete();
                 this.searchTimeoutId = 0;
                 return;
@@ -133,7 +129,7 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
                     // For RemoTalk plugin
                     let userIds: string[] | undefined;
-                    if (searchFilteredUserIds && this.isStaffFilterApplied(params)) {
+                    if (searchFilteredUserIds && params) {
                         const {data} = await searchFilteredUserIds(params);
                         userIds = data;
                     }
@@ -223,29 +219,30 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
     // For RemoTalk plugin
     private onFilterChange = async (value: {[key: string]: number | undefined}) => {
-        const params = {
+        if (!this.props.actions.setStaffFilterParams) {
+            return;
+        }
+        this.props.actions.setStaffFilterParams({
             hospital_id: value.hospital_id,
             department_id: value.department_id,
             profession_id: value.profession_id,
-        };
-        this.setState({
-            filterParams: params,
         });
     };
 
     // For RemoTalk plugin
     private hitTenantFilter = (user: UserProfile) => {
-        return !this.isStaffFilterApplied(this.state.filterParams) || !this.props.filteredUserIds || this.props.filteredUserIds.includes(user.id);
+        return !this.props.isFilterApplied || !this.props.filteredUserIds || this.props.filteredUserIds.includes(user.id);
     };
 
     // For RemoTalk plugin
-    private equalFilter = (a: {[key: string]: number | undefined}, b: {[key: string]: number | undefined}) => {
+    private equalFilter = (
+        a: {[key: string]: number | undefined} | undefined,
+        b: {[key: string]: number | undefined} | undefined,
+    ) => {
+        if (!a || !b) {
+            return !a && !b;
+        }
         return Object.keys(a).every((k) => a[k] === b[k]);
-    };
-
-    // For RemoTalk plugin
-    private isStaffFilterApplied = (params: {[key: string]: number | undefined}) => {
-        return Object.values(params).some((x) => Boolean(x));
     };
 
     render() {
@@ -302,7 +299,7 @@ export default class MemberListTeam extends React.PureComponent<Props, State> {
 
                 // For RemoTalk plugin
                 customFilterOptions={this.getTenantFilterOptions()}
-                customFilterValue={this.state.filterParams}
+                customFilterValue={this.props.filterParams}
                 handleCustomFilterChange={this.onFilterChange}
                 customFilterStyle={{marginBottom: '0.5rem'}}
                 extraInfo={extraInfo}

@@ -34,9 +34,9 @@ type StaffSummary = {
     profession?: string;
 };
 type FilterParams = {
-    hospital_id: number | undefined;
-    department_id: number | undefined;
-    profession_id: number | undefined;
+    hospital_id?: number | undefined;
+    department_id?: number | undefined;
+    profession_id?: number | undefined;
 }
 
 export type Props = {
@@ -72,6 +72,8 @@ export type Props = {
     professions?: FilterOption[];
     staffSummaries?: {[key: string]: StaffSummary};
     filteredUserIds?: string[];
+    filterParams?: FilterParams;
+    isFilterApplied?: boolean;
 
     actions: {
         getProfiles: (page?: number | undefined, perPage?: number | undefined, options?: any) => Promise<ActionResult>;
@@ -89,6 +91,7 @@ export type Props = {
         // For RemoTalk plugin
         getStaffSummaries?: (userIds: string[]) => Promise<ActionResult>;
         searchFilteredUserIds?: (params: FilterParams) => Promise<ActionResult<string[]>>;
+        setStaffFilterParams?: (params: FilterParams) => void;
     };
 }
 
@@ -98,9 +101,6 @@ type State = {
     search: boolean;
     saving: boolean;
     loadingUsers: boolean;
-
-    // For RemoTalk plugin
-    filterParams: {[key: string]: number | undefined};
 }
 
 export default class MoreDirectChannels extends React.PureComponent<Props, State> {
@@ -135,9 +135,6 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
             search: false,
             saving: false,
             loadingUsers: true,
-
-            // For RemoTalk plugin
-            filterParams: {hospital_id: 0, department_id: 0, profession_id: 0},
         };
     }
 
@@ -147,17 +144,13 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
         this.props.actions.loadProfilesMissingStatus(this.props.users);
     };
 
-    updateFromProps(prevProps: Props, prevState: State) {
-        if (prevProps.searchTerm !== this.props.searchTerm || !this.equalFilter(prevState.filterParams, this.state.filterParams)) {
+    updateFromProps(prevProps: Props) {
+        if (prevProps.searchTerm !== this.props.searchTerm || !this.equalFilter(prevProps.filterParams, this.props.filterParams)) {
             clearTimeout(this.searchTimeoutId);
 
-            const params = {
-                hospital_id: this.state.filterParams.hospital_id,
-                department_id: this.state.filterParams.department_id,
-                profession_id: this.state.filterParams.profession_id,
-            };
+            const params = this.props.filterParams;
             const searchTerm = this.props.searchTerm;
-            if (searchTerm === '' && this.isStaffFilterApplied(params)) {
+            if (searchTerm === '' && !this.props.isFilterApplied) {
                 this.resetPaging();
             } else {
                 const teamId = this.props.restrictDirectMessage === 'any' ? '' : this.props.currentTeamId;
@@ -166,7 +159,7 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
                     async () => {
                         this.setUsersLoadingState(true);
                         let userIds: string[] | undefined;
-                        if (this.props.actions.searchFilteredUserIds && this.isStaffFilterApplied(params)) {
+                        if (this.props.actions.searchFilteredUserIds && params) {
                             const {data} = await this.props.actions.searchFilteredUserIds(params);
                             userIds = data;
                         }
@@ -194,12 +187,15 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
         this.loadStaffSummaries();
     }
 
-    componentDidUpdate(prevProps: Props, prevState: State) {
-        this.updateFromProps(prevProps, prevState);
+    componentDidUpdate(prevProps: Props) {
+        this.updateFromProps(prevProps);
     }
 
     handleHide = () => {
         this.props.actions.setModalSearchTerm('');
+        if (this.props.actions.setStaffFilterParams) {
+            this.props.actions.setStaffFilterParams({});
+        }
         this.setState({show: false});
     };
 
@@ -340,29 +336,30 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
 
     // For RemoTalk plugin
     private onFilterChange = async (value: {[key: string]: number | undefined}) => {
-        const params = {
+        if (!this.props.actions.setStaffFilterParams) {
+            return;
+        }
+        this.props.actions.setStaffFilterParams({
             hospital_id: value.hospital_id,
             department_id: value.department_id,
             profession_id: value.profession_id,
-        };
-        this.setState({
-            filterParams: params,
         });
     };
 
     // For RemoTalk plugin
     private hitTenantFilter = (user: UserProfile) => {
-        return !this.isStaffFilterApplied(this.state.filterParams) || !this.props.filteredUserIds || this.props.filteredUserIds.includes(user.id);
+        return !this.props.isFilterApplied || !this.props.filteredUserIds || this.props.filteredUserIds.includes(user.id);
     };
 
     // For RemoTalk plugin
-    private equalFilter = (a: {[key: string]: number | undefined}, b: {[key: string]: number | undefined}) => {
+    private equalFilter = (
+        a: {[key: string]: number | undefined} | undefined,
+        b: {[key: string]: number | undefined} | undefined,
+    ) => {
+        if (!a || !b) {
+            return !a && !b;
+        }
         return Object.keys(a).every((k) => a[k] === b[k]);
-    };
-
-    // For RemoTalk plugin
-    private isStaffFilterApplied = (params: {[key: string]: number | undefined}) => {
-        return Object.values(params).some((x) => Boolean(x));
     };
 
     render() {
@@ -386,7 +383,7 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
 
                 // For RemoTalk plugin
                 customFilterOptions={this.getTenantFilterOptions()}
-                customFilterValue={this.state.filterParams}
+                customFilterValue={this.props.filterParams}
                 handleCustomFilterChange={this.onFilterChange}
             />
         );
@@ -434,4 +431,3 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
         );
     }
 }
-

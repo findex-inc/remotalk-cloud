@@ -284,3 +284,34 @@ export const getFilteredUserIds = createSelector(
         return result as string[];
     },
 );
+
+export const getStaffFilterParams = createSelector(
+    'getStaffFilterParams',
+    getFilterInfo,
+    (info) => {
+        const appliedParams = info?.applied;
+        if (!appliedParams) {
+            return {
+                hospital_id: undefined,
+                department_id: undefined,
+                profession_id: undefined,
+            };
+        }
+        const {
+            hospital_id: hosp,
+            department_id: dept,
+            profession_id: prof,
+        } = appliedParams;
+        return {
+            hospital_id: typeof hosp === 'number' ? hosp : undefined,
+            department_id: typeof dept === 'number' ? dept : undefined,
+            profession_id: typeof prof === 'number' ? prof : undefined,
+        };
+    },
+);
+
+export const getIsFilterApplied = createSelector(
+    'getIsFilterApplied',
+    getStaffFilterParams,
+    (params) => Object.values(params).some((x) => Boolean(x)),
+);

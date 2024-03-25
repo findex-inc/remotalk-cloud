@@ -210,6 +210,7 @@ var config = {
             fingerprints: false,
             orientation: 'any',
             filename: 'manifest.json',
+            crossorigin: 'use-credentials',
             icons: [{
                 src: path.resolve('src/images/favicon/android-chrome-192x192.png'),
                 type: 'image/png',

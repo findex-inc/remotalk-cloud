@@ -19,12 +19,7 @@ pipeline{
     stage('change permission sh files') {
       steps {
         script { currentStage = env.STAGE_NAME }
-        sh '''
-          chmod 755 $(pwd)/cicd/jenkins/push-image.sh
-        '''
-        sh '''
-          chmod 755 $(pwd)/cicd/jenkins/sync-cloudbuild.sh
-        '''
+        sh 'chmod 755 $(pwd)/cicd/jenkins/push-image.sh'
       }
     }
     stage('Build RemoTalk Image') {

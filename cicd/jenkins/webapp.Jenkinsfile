@@ -34,15 +34,7 @@ pipeline{
       }
       steps {
         script { currentStage = env.STAGE_NAME }
-        withCredentials() {
-          sh '''
-            docker build \
-            -f Dockerfile \
-            -t ${remotalk_image_tag} \
-            --progress=plain \
-            .
-          '''
-        }
+        sh 'docker build -f Dockerfile -t ${remotalk_image_tag} --progress=plain .'
       }
     }
     stage('Push RemoTalk Image to Artifact Registry') {

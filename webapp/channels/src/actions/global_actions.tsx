@@ -243,11 +243,8 @@ export function emitLocalUserTypingEvent(channelId: string, parentPostId: string
 export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = true, userAction = true) {
     // If the logout was intentional, discard knowledge about having previously been logged in.
     // This bit is otherwise used to detect session expirations on the login page.
-    let overwrittenRedirectTo = redirectTo;
     const state = getState();
-    if (isUsingTenantManagementService(state)) {
-        overwrittenRedirectTo = '/__fdx/logout';
-    }
+    const usingTMService = isUsingTenantManagementService(state);
 
     if (userAction) {
         LocalStorageStore.setWasLoggedIn(false);
@@ -262,9 +259,17 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
 
         clearUserCookie();
 
-        getHistory().push(overwrittenRedirectTo);
+        if (usingTMService) {
+            location.href = location.origin + '/__fdx/logout';
+            return;
+        }
+        getHistory().push(redirectTo);
     }).catch(() => {
-        getHistory().push(overwrittenRedirectTo);
+        if (usingTMService) {
+            location.href = location.origin + '/__fdx/logout';
+            return;
+        }
+        getHistory().push(redirectTo);
     });
 }
 

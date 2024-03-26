@@ -34,6 +34,7 @@ import {close as closeLhs} from 'actions/views/lhs';
 import {closeRightHandSide, closeMenu as closeRhsMenu, updateRhsState} from 'actions/views/rhs';
 import * as WebsocketActions from 'actions/websocket_actions.jsx';
 import {getCurrentLocale} from 'selectors/i18n';
+import {isUsingTenantManagementService} from 'selectors/plugins';
 import {getIsRhsOpen, getPreviousRhsState, getRhsState} from 'selectors/rhs';
 import BrowserStore from 'stores/browser_store';
 import LocalStorageStore from 'stores/local_storage_store';
@@ -242,6 +243,12 @@ export function emitLocalUserTypingEvent(channelId: string, parentPostId: string
 export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = true, userAction = true) {
     // If the logout was intentional, discard knowledge about having previously been logged in.
     // This bit is otherwise used to detect session expirations on the login page.
+    let overwrittenRedirectTo = redirectTo;
+    const state = getState();
+    if (isUsingTenantManagementService(state)) {
+        overwrittenRedirectTo = '/__fdx/logout';
+    }
+
     if (userAction) {
         LocalStorageStore.setWasLoggedIn(false);
     }
@@ -255,9 +262,9 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
 
         clearUserCookie();
 
-        getHistory().push(redirectTo);
+        getHistory().push(overwrittenRedirectTo);
     }).catch(() => {
-        getHistory().push(redirectTo);
+        getHistory().push(overwrittenRedirectTo);
     });
 }
 

@@ -130,7 +130,7 @@ export function getRemoTalkPluginState(s: any) {
 export const getRemoTalkPluginConfig = createSelector(
     'getRemoTalkPluginConfig',
     getRemoTalkPluginState,
-    (s) => s?.config,
+    (s) => s?.config as any,
 );
 
 export const securitySettingsInvisible = createSelector(
@@ -188,6 +188,12 @@ export const getHideUsername = createSelector(
     isRemoTalkPluginEnabled,
     getRemoTalkPluginConfig,
     (enabled, config) => Boolean(enabled && config?.HideUsername),
+);
+
+export const isUsingTenantManagementService = createSelector(
+    'isUsingTenantManagementService',
+    getRemoTalkPluginConfig,
+    (config) => Boolean(config?.UseTenantManagementService),
 );
 
 export function getTenantInfo(s: any) {

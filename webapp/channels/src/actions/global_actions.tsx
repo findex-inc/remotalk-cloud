@@ -259,17 +259,9 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
 
         clearUserCookie();
 
-        if (usingTMService) {
-            location.href = location.origin + '/__fdx/logout';
-            return;
-        }
-        getHistory().push(redirectTo);
+        getHistory().push(usingTMService ? '/__fdx/logout' : redirectTo);
     }).catch(() => {
-        if (usingTMService) {
-            location.href = location.origin + '/__fdx/logout';
-            return;
-        }
-        getHistory().push(redirectTo);
+        getHistory().push(usingTMService ? '/__fdx/logout' : redirectTo);
     });
 }
 

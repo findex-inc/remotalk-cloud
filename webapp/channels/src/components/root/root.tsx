@@ -4,7 +4,7 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React from 'react';
-import {Route, Switch, Redirect} from 'react-router-dom';
+import {Route, Switch, Redirect, Link} from 'react-router-dom';
 import type {RouteComponentProps} from 'react-router-dom';
 
 import {ServiceEnvironment} from '@mattermost/types/config';
@@ -526,7 +526,7 @@ export default class Root extends React.PureComponent<Props, State> {
                     />
                     <Route
                         path={'/__fdx/logout'}
-                        component={() => (<p>{'...'}</p>)}
+                        component={() => (<Link to='/'>{'< Back'}</Link>)}
                     />
                     <HFRoute
                         path={'/login'}

@@ -23,6 +23,7 @@ import {redirectUserToDefaultTeam} from 'actions/global_actions';
 import {addUserToTeamFromInvite} from 'actions/team_actions';
 import {trackEvent} from 'actions/telemetry_actions';
 import {login} from 'actions/views/login';
+import {isUsingTenantManagementService} from 'selectors/plugins';
 import LocalStorageStore from 'stores/local_storage_store';
 
 import AlertBanner from 'components/alert_banner';
@@ -107,6 +108,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const experimentalPrimaryTeam = useSelector((state: GlobalState) => (ExperimentalPrimaryTeam ? getTeamByName(state, ExperimentalPrimaryTeam) : undefined));
     const experimentalPrimaryTeamMember = useSelector((state: GlobalState) => getMyTeamMember(state, experimentalPrimaryTeam?.id ?? ''));
     const onboardingFlowEnabled = useSelector(getIsOnboardingFlowEnabled);
+    const usingTMService = useSelector(isUsingTenantManagementService);
 
     const loginIdInput = useRef<HTMLInputElement>(null);
     const passwordInput = useRef<HTMLInputElement>(null);
@@ -403,6 +405,10 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             return;
         }
 
+        if (query.get('fdx_logout') === 'true') {
+            window.location.href = '/__fdx/logout';
+            return;
+        }
         if (currentUser) {
             if (redirectTo && redirectTo.match(/^\/([^/]|$)/)) {
                 history.push(redirectTo);
@@ -436,6 +442,12 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                 newSearchParam.set('extra', Constants.SESSION_EXPIRED);
                 history.replace(`${pathname}?${newSearchParam}`);
             }
+        }
+
+        if (usingTMService && !query.get('fdx_login_completed')) {
+            const params = new URLSearchParams(search);
+            params.append('fdx_login_at', new Date().getTime().toString());
+            window.location.href = '/plugins/jp.co.findex.remotalk-plugin/fdx/login?' + params.toString();
         }
     }, []);
 

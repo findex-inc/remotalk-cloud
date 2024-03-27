@@ -459,6 +459,12 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (query.get('fdx_logout') === 'true') {
+            window.location.href = '/__fdx/logout';
+        }
+    }, []);
+
     if (initializing) {
         return (<LoadingScreen/>);
     }

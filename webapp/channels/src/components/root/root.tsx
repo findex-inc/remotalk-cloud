@@ -386,7 +386,7 @@ export default class Root extends React.PureComponent<Props, State> {
         const query = new URLSearchParams(window.location.search);
         if (query.get('fdx_logout')) {
             this.hrefChanged = true;
-            window.location.href = '/__fdx/logout';
+            window.location.href = '/__fdx/logout#' + new Date().getTime().toString();
         } else if (
             window.location.pathname === '/login' &&
             !query.get('fdx_login_completed') &&

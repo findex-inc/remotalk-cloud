@@ -359,6 +359,7 @@ export default class Root extends React.PureComponent<Props, State> {
     };
 
     private hrefChanged: boolean = false;
+    private redirectTimeout: number = 0;
 
     componentDidUpdate(prevProps: Props) {
         if (!deepEqual(prevProps.theme, this.props.theme)) {
@@ -378,29 +379,31 @@ export default class Root extends React.PureComponent<Props, State> {
         ) {
             this.setRootMeta();
         }
-        console.log(`hrefChanged: ${this.hrefChanged}, using: ${this.props.usingTMService}`);
-        if (!this.hrefChanged) {
-            this.redirectToFdxLoginLogoutEndpoint();
+        console.log(`redirectTimeout: ${this.redirectTimeout}, using: ${this.props.usingTMService}`);
+        if (!this.redirectTimeout) {
+            this.redirectToFdxLoginLogoutEndpoint(1000);
         }
     }
 
-    private redirectToFdxLoginLogoutEndpoint() {
+    private redirectToFdxLoginLogoutEndpoint(delay = 100) {
         const query = new URLSearchParams(window.location.search);
         if (query.get('fdx_logout') && window.location.pathname !== '/__fdx/logout') {
-            console.log('redirecting to /__fdx/logout');
-            this.hrefChanged = true;
-            window.location.href = '/__fdx/logout#' + new Date().getTime().toString();
+            this.redirectTimeout = window.setTimeout(() => {
+                console.log('redirecting to /__fdx/logout');
+                window.location.href = '/__fdx/logout#' + new Date().getTime().toString();
+            }, delay);
         } else if (
             window.location.pathname === '/login' &&
             !query.get('fdx_login_completed') &&
             !getCurrentUser(store.getState()) &&
             this.props.usingTMService
         ) {
-            console.log('redirecting to /fdx/login');
-            this.hrefChanged = true;
-            const params = new URLSearchParams(window.location.search);
-            params.append('fdx_login_at', new Date().getTime().toString());
-            window.location.href = '/plugins/jp.co.findex.remotalk-plugin/fdx/login?' + params.toString();
+            this.redirectTimeout = window.setTimeout(() => {
+                console.log('redirecting to /fdx/login');
+                const params = new URLSearchParams(window.location.search);
+                params.append('fdx_login_at', new Date().getTime().toString());
+                window.location.href = '/plugins/jp.co.findex.remotalk-plugin/fdx/login?' + params.toString();
+            }, delay);
         }
     }
 
@@ -498,8 +501,13 @@ export default class Root extends React.PureComponent<Props, State> {
     }
 
     componentWillUnmount() {
+        console.log('root.tsx is unmounting...');
         this.mounted = false;
         window.removeEventListener('storage', this.handleLogoutLoginSignal);
+        if (this.redirectTimeout) {
+            console.log('clear redirect timeout');
+            window.clearTimeout(this.redirectTimeout);
+        }
     }
 
     handleLogoutLoginSignal = (e: StorageEvent) => {

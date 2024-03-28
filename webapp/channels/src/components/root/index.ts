@@ -16,7 +16,7 @@ import {shouldShowTermsOfService, getCurrentUserId} from 'mattermost-redux/selec
 import {migrateRecentEmojis} from 'actions/emoji_actions';
 import {loadConfigAndMe, registerCustomPostRenderer} from 'actions/views/root';
 import {getShowLaunchingWorkspace} from 'selectors/onboarding';
-import {shouldShowAppBar} from 'selectors/plugins';
+import {shouldShowAppBar, isUsingTenantManagementService} from 'selectors/plugins';
 import {
     getIsRhsExpanded,
     getIsRhsOpen,
@@ -58,6 +58,7 @@ function mapStateToProps(state: GlobalState) {
         rhsState: getRhsState(state),
         shouldShowAppBar: shouldShowAppBar(state),
         isCloud: isCurrentLicenseCloud(state),
+        usingTMService: isUsingTenantManagementService(state),
     };
 }
 

@@ -25,6 +25,7 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 import {loadRecentlyUsedCustomEmojis} from 'actions/emoji_actions';
 import * as GlobalActions from 'actions/global_actions';
 import {measurePageLoadTelemetry, temporarilySetPageLoadContext, trackEvent, trackSelectorMetrics} from 'actions/telemetry_actions.jsx';
+import {isUsingTenantManagementService} from 'selectors/plugins';
 import BrowserStore from 'stores/browser_store';
 import store from 'stores/redux_store';
 
@@ -356,6 +357,8 @@ export default class Root extends React.PureComponent<Props, State> {
         BrowserStore.setLandingPageSeen(true);
     };
 
+    private hrefChanged: boolean = false;
+
     componentDidUpdate(prevProps: Props) {
         if (!deepEqual(prevProps.theme, this.props.theme)) {
             Utils.applyTheme(this.props.theme);
@@ -373,6 +376,27 @@ export default class Root extends React.PureComponent<Props, State> {
             this.props.rhsIsExpanded !== prevProps.rhsIsExpanded
         ) {
             this.setRootMeta();
+        }
+        if (!this.hrefChanged) {
+            this.redirectToFdxLoginLogoutEndpoint();
+        }
+    }
+
+    private redirectToFdxLoginLogoutEndpoint() {
+        const query = new URLSearchParams(window.location.search);
+        if (query.get('fdx_logout')) {
+            this.hrefChanged = true;
+            window.location.href = '/__fdx/logout';
+        } else if (
+            window.location.pathname === '/login' &&
+            !query.get('fdx_login_completed') &&
+            !getCurrentUser(store.getState()) &&
+            isUsingTenantManagementService(store.getState())
+        ) {
+            this.hrefChanged = true;
+            const params = new URLSearchParams(window.location.search);
+            params.append('fdx_login_at', new Date().getTime().toString());
+            window.location.href = '/plugins/jp.co.findex.remotalk-plugin/fdx/login?' + params.toString();
         }
     }
 

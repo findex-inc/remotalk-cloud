@@ -85,6 +85,7 @@ function shouldFetch(req) {
         !req.url.startsWith(self.location.origin) ||
         /.*\/api\/.*/.test(req.url) ||
         /.*sw.js/.test(req.url) ||
+        /.*\/__fdx\/.*/.test(req.url) ||
         req.method !== "GET"
     );
 }

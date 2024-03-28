@@ -161,6 +161,7 @@ type Props = {
     rhsIsExpanded: boolean;
     rhsIsOpen: boolean;
     shouldShowAppBar: boolean;
+    usingTMService?: boolean;
 } & RouteComponentProps
 
 interface State {
@@ -377,6 +378,7 @@ export default class Root extends React.PureComponent<Props, State> {
         ) {
             this.setRootMeta();
         }
+        console.log(`hrefChanged: ${this.hrefChanged}, using: ${this.props.usingTMService}`);
         if (!this.hrefChanged) {
             this.redirectToFdxLoginLogoutEndpoint();
         }
@@ -384,15 +386,17 @@ export default class Root extends React.PureComponent<Props, State> {
 
     private redirectToFdxLoginLogoutEndpoint() {
         const query = new URLSearchParams(window.location.search);
-        if (query.get('fdx_logout')) {
+        if (query.get('fdx_logout') && window.location.pathname !== '/__fdx/logout') {
+            console.log('redirecting to /__fdx/logout');
             this.hrefChanged = true;
             window.location.href = '/__fdx/logout#' + new Date().getTime().toString();
         } else if (
             window.location.pathname === '/login' &&
             !query.get('fdx_login_completed') &&
             !getCurrentUser(store.getState()) &&
-            isUsingTenantManagementService(store.getState())
+            this.props.usingTMService
         ) {
+            console.log('redirecting to /fdx/login');
             this.hrefChanged = true;
             const params = new URLSearchParams(window.location.search);
             params.append('fdx_login_at', new Date().getTime().toString());

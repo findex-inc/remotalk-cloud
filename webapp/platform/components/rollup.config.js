@@ -2,10 +2,10 @@
 // See LICENSE.txt for license information.
 
 // eslint-disable-next-line import/no-unresolved
-import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import scss from 'rollup-plugin-scss';
+import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
+import scss from 'rollup-plugin-scss';
 
 import packagejson from './package.json';
 
@@ -18,12 +18,15 @@ const externals = [
     'reselect',
 ];
 
+// eslint-disable-next-line no-process-env
+const isProduction = process.env.NODE_ENV === 'production';
+
 export default [
     {
         input: 'src/index.tsx',
         output: [
             {
-                sourcemap: true,
+                sourcemap: !isProduction,
                 file: packagejson.module,
                 format: 'es',
                 globals: {'styled-components': 'styled'},

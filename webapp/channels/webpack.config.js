@@ -379,7 +379,6 @@ if (DEV) {
 } else {
     // Production mode configuration
     config.mode = 'production';
-    config.devtool = 'source-map';
 }
 
 const env = {};

@@ -81,13 +81,16 @@ async function deleteAllCaches() {
  * @returns {bool}
  */
 function shouldFetch(req) {
-    return (
-        !req.url.startsWith(self.location.origin) ||
-        /.*\/api\/.*/.test(req.url) ||
-        /.*sw.js/.test(req.url) ||
-        /.*\/__fdx\/.*/.test(req.url) ||
-        req.method !== "GET"
-    );
+    try {
+        const u = new URL(req.url);
+        return (
+            u.origin !== self.location.origin ||
+            !u.pathname.startsWith("/static") ||
+            req.method !== "GET"
+        );
+    } catch {
+        return true;
+    }
 }
 
 const errorPage = `<html>
@@ -109,8 +112,7 @@ async function respondWithCache(req) {
     try {
         const resp = await fetch(req);
         const cloned = resp.clone();
-        const type = cloned.headers.get("content-type");
-        if (!cloned || cloned.status !== 200 || /text\/html/.test(type)) {
+        if (!cloned || cloned.status !== 200) {
             return resp;
         }
         const cache = await caches.open(CACHE_NAME);

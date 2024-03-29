@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y make gcc nasm libpng-dev
 
 COPY ./webapp /home/webapp
 WORKDIR /home/webapp
-RUN make dist
+RUN NODE_ENV=production make dist
 
 FROM golang:1.20 AS server
 

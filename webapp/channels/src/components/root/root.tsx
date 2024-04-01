@@ -25,7 +25,6 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 import {loadRecentlyUsedCustomEmojis} from 'actions/emoji_actions';
 import * as GlobalActions from 'actions/global_actions';
 import {measurePageLoadTelemetry, temporarilySetPageLoadContext, trackEvent, trackSelectorMetrics} from 'actions/telemetry_actions.jsx';
-import {isUsingTenantManagementService} from 'selectors/plugins';
 import BrowserStore from 'stores/browser_store';
 import store from 'stores/redux_store';
 
@@ -387,12 +386,7 @@ export default class Root extends React.PureComponent<Props, State> {
 
     private redirectToFdxLoginLogoutEndpoint(delay = 100) {
         const query = new URLSearchParams(window.location.search);
-        if (query.get('fdx_logout') && window.location.pathname !== '/__fdx/logout') {
-            this.redirectTimeout = window.setTimeout(() => {
-                console.log('redirecting to /__fdx/logout');
-                window.location.href = '/__fdx/logout#' + new Date().getTime().toString();
-            }, delay);
-        } else if (
+        if (
             window.location.pathname === '/login' &&
             !query.get('fdx_login_completed') &&
             !getCurrentUser(store.getState()) &&

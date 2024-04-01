@@ -240,17 +240,6 @@ export function emitLocalUserTypingEvent(channelId: string, parentPostId: string
     return dispatch(userTyping);
 }
 
-function createLogoutRedirectUrl(redirectTo: string, usingTMService: boolean) {
-    if (URL.canParse(redirectTo) || !URL.canParse(redirectTo, window.location.origin)) {
-        return redirectTo;
-    }
-    const u = new URL(redirectTo, window.location.origin);
-    if (usingTMService) {
-        u.searchParams.set('fdx_logout', 'true');
-    }
-    return u.pathname + '?' + u.searchParams.toString();
-}
-
 export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = true, userAction = true) {
     // If the logout was intentional, discard knowledge about having previously been logged in.
     // This bit is otherwise used to detect session expirations on the login page.
@@ -259,6 +248,13 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
 
     if (userAction) {
         LocalStorageStore.setWasLoggedIn(false);
+    }
+
+    if (usingTMService) {
+        WebsocketActions.close();
+        clearUserCookie();
+        window.location.href = '/__fdx/logout';
+        return;
     }
 
     dispatch(logout()).then(() => {
@@ -270,9 +266,9 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
 
         clearUserCookie();
 
-        getHistory().push(createLogoutRedirectUrl(redirectTo, usingTMService));
+        getHistory().push(redirectTo);
     }).catch(() => {
-        getHistory().push(createLogoutRedirectUrl(redirectTo, usingTMService));
+        getHistory().push(redirectTo);
     });
 }
 

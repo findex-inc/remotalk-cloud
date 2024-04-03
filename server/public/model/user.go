@@ -745,7 +745,7 @@ func (u *User) ValidateCustomStatus() bool {
 
 func (u *User) GetFullName() string {
 	if u.FirstName != "" && u.LastName != "" {
-		return u.FirstName + " " + u.LastName
+		return u.LastName + " " + u.FirstName // u.FirstName + " " + u.LastName
 	} else if u.FirstName != "" {
 		return u.FirstName
 	} else if u.LastName != "" {

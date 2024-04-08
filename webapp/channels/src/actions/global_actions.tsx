@@ -246,15 +246,15 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
     const state = getState();
     const usingTMService = isUsingTenantManagementService(state);
 
-    if (userAction) {
-        LocalStorageStore.setWasLoggedIn(false);
-    }
-
     if (usingTMService) {
         WebsocketActions.close();
         clearUserCookie();
         window.location.href = '/__fdx/logout';
         return;
+    }
+
+    if (userAction) {
+        LocalStorageStore.setWasLoggedIn(false);
     }
 
     dispatch(logout()).then(() => {

@@ -4,8 +4,9 @@
 import {batchActions} from 'redux-batched-actions';
 
 import type {Command, CommandArgs, DialogSubmission, IncomingWebhook, OAuthApp, OutgoingOAuthConnection, OutgoingWebhook, SubmitDialogResponse} from '@mattermost/types/integrations';
+import type {UserProfile} from '@mattermost/types/users';
 
-import {IntegrationTypes} from 'mattermost-redux/action_types';
+import {IntegrationTypes, UserTypes} from 'mattermost-redux/action_types';
 import {Client4} from 'mattermost-redux/client';
 import {getCurrentChannelId} from 'mattermost-redux/selectors/entities/channels';
 import {getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
@@ -563,5 +564,45 @@ export function searchFilteredUserIds(params: {
             dispatch(logError(error));
             return {error};
         }
+    };
+}
+
+export function updateMyFindexUserInfo(user: UserProfile, patch: {
+    last_name?: string;
+    first_name?: string;
+    email?: string;
+    phone?: string;
+}): ActionFuncAsync {
+    return async (dispatch) => {
+        dispatch({type: UserTypes.UPDATE_ME_REQUEST, data: null});
+
+        try {
+            await Client4.updateMyFindexUserInfo(patch);
+        } catch (error) {
+            dispatch({type: UserTypes.UPDATE_ME_FAILURE, error});
+            dispatch(logError(error));
+            return {error};
+        }
+
+        const actions: Array<{type: string; data?: any}> = [
+            {type: UserTypes.UPDATE_ME_SUCCESS},
+        ];
+        const data = Object.assign({}, user);
+        if (typeof patch.last_name !== 'undefined') {
+            data.last_name = patch.last_name;
+        }
+        if (typeof patch.first_name !== 'undefined') {
+            user.first_name = patch.first_name;
+        }
+        if (typeof patch.email !== 'undefined') {
+            user.email = patch.email;
+        }
+        if (typeof patch.phone !== 'undefined') {
+            actions.push({type: 'UPDATED_STAFF_PHONE', data: patch.phone});
+        }
+        actions.push({type: UserTypes.RECEIVED_ME, data});
+        dispatch(batchActions(actions));
+
+        return {data: true};
     };
 }

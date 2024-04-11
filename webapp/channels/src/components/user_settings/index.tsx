@@ -26,6 +26,7 @@ export type Props = {
     setEnforceFocus: () => void;
     setRequireConfirm: () => void;
     pluginSettings: {[tabName: string]: PluginConfiguration};
+    phone?: string;
 };
 
 export default function UserSettings(props: Props) {
@@ -39,6 +40,7 @@ export default function UserSettings(props: Props) {
                     updateTab={props.updateTab}
                     closeModal={props.closeModal}
                     collapseModal={props.collapseModal}
+                    phone={props.phone}
                 />
             </div>
         );

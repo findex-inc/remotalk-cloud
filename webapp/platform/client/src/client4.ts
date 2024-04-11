@@ -4412,6 +4412,14 @@ export default class Client4 {
             body: JSON.stringify(userIds),
         });
     };
+
+    // For RemoTalk plugin
+    updateMyFindexUserInfo = (patch: {last_name?: string; first_name?: string; email?: string; phone?: string}) => {
+        return this.doFetch<StatusOK>(`${this.getRemoTalkV1Route()}/users/me`, {
+            method: 'put',
+            body: JSON.stringify(patch),
+        });
+    };
 }
 
 export function parseAndMergeNestedHeaders(originalHeaders: any) {

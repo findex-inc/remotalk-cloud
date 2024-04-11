@@ -6,6 +6,7 @@ import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
 import {clearErrors, logError} from 'mattermost-redux/actions/errors';
+import {updateMyFindexUserInfo} from 'mattermost-redux/actions/integrations';
 import {
     updateMe,
     sendVerificationEmail,
@@ -65,6 +66,9 @@ function mapDispatchToProps(dispatch: Dispatch) {
             sendVerificationEmail,
             setDefaultProfileImage,
             uploadProfileImage,
+
+            // For RemoTalk plugin
+            updateMyFindexUserInfo,
         }, dispatch),
     };
 }

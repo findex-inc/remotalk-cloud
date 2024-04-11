@@ -10,7 +10,7 @@ import {sendVerificationEmail} from 'mattermost-redux/actions/users';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 
-import {getPluginUserSettings, securitySettingsInvisible} from 'selectors/plugins';
+import {getMyPhoneNumber, getPluginUserSettings, securitySettingsInvisible} from 'selectors/plugins';
 
 import {makeAsyncComponent} from 'components/async_load';
 
@@ -26,6 +26,7 @@ function mapStateToProps(state: GlobalState) {
 
     // For RemoTalk plugin
     const hideSecurity = securitySettingsInvisible(state);
+    const phone = getMyPhoneNumber(state);
 
     return {
         currentUser: getCurrentUser(state),
@@ -33,6 +34,7 @@ function mapStateToProps(state: GlobalState) {
         requireEmailVerification,
         pluginSettings: getPluginUserSettings(state),
         hideSecurity,
+        phone,
     };
 }
 

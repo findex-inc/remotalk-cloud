@@ -94,6 +94,10 @@ const holders = defineMessages({
         id: 'user.settings.general.position',
         defaultMessage: 'Position',
     },
+    phone: {
+        id: 'user.settings.general.phone',
+        defaultMessage: 'Phone',
+    },
 });
 
 export type Props = {
@@ -113,6 +117,9 @@ export type Props = {
         sendVerificationEmail: (email: string) => Promise<ActionResult>;
         setDefaultProfileImage: (id: string) => void;
         uploadProfileImage: (id: string, file: File) => Promise<ActionResult>;
+
+        // For RemoTalk plugin
+        updateMyFindexUserInfo?: (user: UserProfile, patch: {last_name?: string; first_name?: string; email?: string; phone?: string}) => Promise<ActionResult>;
     };
     requireEmailVerification?: boolean;
     ldapFirstNameAttributeSet?: boolean;
@@ -127,6 +134,7 @@ export type Props = {
 
     // For RemoTalk plugin
     itemsToHide?: string[];
+    phone?: string;
 }
 
 type State = {
@@ -147,6 +155,9 @@ type State = {
     clientError?: string | null;
     serverError?: string | {server_error_id: string; message: string};
     emailError?: string;
+
+    // For RemoTalk plugin
+    phone: string;
 }
 
 export class UserSettingsGeneralTab extends PureComponent<Props, State> {
@@ -241,6 +252,21 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         this.submitUser(user, false);
     };
 
+    submitFindexName = () => {
+        const user = Object.assign({}, this.props.user);
+        const firstName = this.state.firstName.trim();
+        const lastName = this.state.lastName.trim();
+
+        if (user.first_name === firstName && user.last_name === lastName) {
+            this.updateSection('');
+            return;
+        }
+
+        trackEvent('settings', 'user_settings_update', {field: 'fullname'});
+
+        this.submitFindexUser(user, {first_name: firstName, last_name: lastName});
+    };
+
     submitName = () => {
         const user = Object.assign({}, this.props.user);
         const firstName = this.state.firstName.trim();
@@ -257,6 +283,54 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         trackEvent('settings', 'user_settings_update', {field: 'fullname'});
 
         this.submitUser(user, false);
+    };
+
+    submitFindexEmail = () => {
+        const user = Object.assign({}, this.props.user);
+        const email = this.state.email.trim().toLowerCase();
+        const confirmEmail = this.state.confirmEmail.trim().toLowerCase();
+
+        const {formatMessage} = this.props.intl;
+
+        if (email === user.email && (confirmEmail === '' || confirmEmail === user.email)) {
+            this.updateSection('');
+            return;
+        }
+
+        if (email === '' || !isEmail(email)) {
+            this.setState({emailError: formatMessage(holders.validEmail), clientError: '', serverError: ''});
+            return;
+        }
+
+        if (email !== confirmEmail) {
+            this.setState({emailError: formatMessage(holders.emailMatch), clientError: '', serverError: ''});
+            return;
+        }
+
+        trackEvent('settings', 'user_settings_update', {field: 'email'});
+        this.submitFindexUser(user, {email});
+    };
+
+    submitFindexUser = (user: UserProfile, patch: {last_name?: string; first_name?: string; email?: string; phone?: string}) => {
+        if (!this.props.actions.updateMyFindexUserInfo) {
+            return;
+        }
+        this.setState({sectionIsSaving: true});
+
+        this.props.actions.updateMyFindexUserInfo(user, patch).
+            then(({data, error: err}) => {
+                if (data) {
+                    this.updateSection('');
+                } else if (err) {
+                    let serverError;
+                    if (err.message) {
+                        serverError = err.message;
+                    } else {
+                        serverError = err;
+                    }
+                    this.setState({serverError, emailError: '', clientError: '', sectionIsSaving: false});
+                }
+            });
     };
 
     submitEmail = () => {
@@ -396,6 +470,20 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         this.submitUser(user, false);
     };
 
+    submitPhone = () => {
+        const user = Object.assign({}, this.props.user);
+        const phone = this.state.phone.trim();
+
+        if (this.props.phone === phone) {
+            this.updateSection('');
+            return;
+        }
+
+        trackEvent('settings', 'user_settings_update', {field: 'phone'});
+
+        this.submitFindexUser(user, {phone});
+    };
+
     updateUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({username: e.target.value});
     };
@@ -439,6 +527,10 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         }
     };
 
+    updatePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.setState({phone: e.target.value});
+    };
+
     updateSection = (section: string) => {
         this.setState(Object.assign({}, this.setupInitialState(this.props), {clientError: '', serverError: '', emailError: '', sectionIsSaving: false}));
         this.submitActive = false;
@@ -463,6 +555,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
             sectionIsSaving: false,
             showSpinner: false,
             serverError: '',
+            phone: props.phone ?? '',
         };
     }
 
@@ -493,7 +586,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
 
             let submit = null;
 
-            if (this.props.user.auth_service === '') {
+            if (this.props.user.auth_service === '' || this.props.user.auth_service === Constants.FINDEX_SERVICE) {
                 inputs.push(
                     <div key='currentEmailSetting'>
                         <div className='form-group'>
@@ -559,31 +652,33 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     </div>,
                 );
 
-                inputs.push(
-                    <div key='currentPassword'>
-                        <div className='form-group'>
-                            <label className='col-sm-5 control-label'>
-                                <FormattedMessage
-                                    id='user.settings.general.currentPassword'
-                                    defaultMessage='Current Password'
-                                />
-                            </label>
-                            <div className='col-sm-7'>
-                                <input
-                                    id='currentPassword'
-                                    className='form-control'
-                                    type='password'
-                                    onChange={this.updateCurrentPassword}
-                                    value={this.state.currentPassword}
-                                    aria-label={formatMessage({id: 'user.settings.general.currentPassword', defaultMessage: 'Current Password'})}
-                                />
+                if (this.props.user.auth_service === '') {
+                    inputs.push(
+                        <div key='currentPassword'>
+                            <div className='form-group'>
+                                <label className='col-sm-5 control-label'>
+                                    <FormattedMessage
+                                        id='user.settings.general.currentPassword'
+                                        defaultMessage='Current Password'
+                                    />
+                                </label>
+                                <div className='col-sm-7'>
+                                    <input
+                                        id='currentPassword'
+                                        className='form-control'
+                                        type='password'
+                                        onChange={this.updateCurrentPassword}
+                                        value={this.state.currentPassword}
+                                        aria-label={formatMessage({id: 'user.settings.general.currentPassword', defaultMessage: 'Current Password'})}
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        {helpText}
-                    </div>,
-                );
+                            {helpText}
+                        </div>,
+                    );
+                }
 
-                submit = this.submitEmail;
+                submit = this.props.user.auth_service === Constants.FINDEX_SERVICE ? this.submitFindexEmail : this.submitEmail;
             } else if (this.props.user.auth_service === Constants.GITLAB_SERVICE) {
                 inputs.push(
                     <div
@@ -691,6 +786,20 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                         {helpText}
                     </div>,
                 );
+            } else if (this.props.user.auth_service === Constants.PSC_SERVICE) {
+                inputs.push(
+                    <div
+                        key='pscEmailInfo'
+                        className='pb-2'
+                    >
+                        <div className='setting-list__hint pb-3'>
+                            <FormattedMessage
+                                id='user.settings.general.emailPscCantUpdate'
+                                defaultMessage='Login occurs through RemoTalk viewer. Email cannot be updated.'
+                            />
+                        </div>
+                    </div>,
+                );
             }
 
             max = (
@@ -764,6 +873,23 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     }}
                 />
             );
+        } else if (this.props.user.auth_service === Constants.PSC_SERVICE) {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.loginPsc'
+                    defaultMessage='Login done through RemoTalk viewer'
+                />
+            );
+        } else if (this.props.user.auth_service === Constants.FINDEX_SERVICE) {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.loginFindex'
+                    defaultMessage='Login done through Findex Auth service ({email})'
+                    values={{
+                        email: this.state.originalEmail,
+                    }}
+                />
+            );
         }
 
         return (
@@ -813,6 +939,31 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
             } else {
                 inputs.push(
                     <div
+                        key='lastNameSetting'
+                        className='form-group'
+                    >
+                        <label className='col-sm-5 control-label'>
+                            <FormattedMessage
+                                id='user.settings.general.lastName'
+                                defaultMessage='Last Name'
+                            />
+                        </label>
+                        <div className='col-sm-7'>
+                            <input
+                                id='lastName'
+                                className='form-control'
+                                type='text'
+                                onChange={this.updateLastName}
+                                maxLength={Constants.MAX_LASTNAME_LENGTH}
+                                value={this.state.lastName}
+                                aria-label={formatMessage({id: 'user.settings.general.lastName', defaultMessage: 'Last Name'})}
+                            />
+                        </div>
+                    </div>,
+                );
+
+                inputs.push(
+                    <div
                         key='firstNameSetting'
                         className='form-group'
                     >
@@ -833,31 +984,6 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                                 value={this.state.firstName}
                                 onFocus={Utils.moveCursorToEnd}
                                 aria-label={formatMessage({id: 'user.settings.general.firstName', defaultMessage: 'First Name'})}
-                            />
-                        </div>
-                    </div>,
-                );
-
-                inputs.push(
-                    <div
-                        key='lastNameSetting'
-                        className='form-group'
-                    >
-                        <label className='col-sm-5 control-label'>
-                            <FormattedMessage
-                                id='user.settings.general.lastName'
-                                defaultMessage='Last Name'
-                            />
-                        </label>
-                        <div className='col-sm-7'>
-                            <input
-                                id='lastName'
-                                className='form-control'
-                                type='text'
-                                onChange={this.updateLastName}
-                                maxLength={Constants.MAX_LASTNAME_LENGTH}
-                                value={this.state.lastName}
-                                aria-label={formatMessage({id: 'user.settings.general.lastName', defaultMessage: 'Last Name'})}
                             />
                         </div>
                     </div>,
@@ -893,7 +1019,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     </span>
                 );
 
-                submit = this.submitName;
+                submit = this.props.user.auth_service === Constants.FINDEX_SERVICE ? this.submitFindexName : this.submitName;
             }
 
             max = (
@@ -1357,6 +1483,111 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         );
     };
 
+    createPhoneSection = () => {
+        const user = this.props.user;
+        const phone = this.props.phone;
+        const {formatMessage} = this.props.intl;
+
+        const active = this.props.activeSection === 'phone';
+        let max = null;
+        if (active) {
+            const inputs = [];
+
+            let extraInfo: JSX.Element | string = '';
+            let submit = null;
+            if (user.auth_service === Constants.FINDEX_SERVICE) {
+                let phoneLabel: JSX.Element | string = (
+                    <FormattedMessage
+                        id='user.settings.general.phone'
+                        defaultMessage='Phone'
+                    />
+                );
+                if (this.props.isMobileView) {
+                    phoneLabel = '';
+                }
+
+                inputs.push(
+                    <div
+                        key='phoneSetting'
+                        className='form-group'
+                    >
+                        <label className='col-sm-5 control-label'>{phoneLabel}</label>
+                        <div className='col-sm-7'>
+                            <input
+                                id='phone'
+                                autoFocus={true}
+                                className='form-control'
+                                type='text'
+                                onChange={this.updatePhone}
+                                value={this.state.phone}
+                                maxLength={15}
+                                autoCapitalize='off'
+                                onFocus={Utils.moveCursorToEnd}
+                                aria-label={formatMessage({id: 'user.settings.general.phone', defaultMessage: 'Phone'})}
+                            />
+                        </div>
+                    </div>,
+                );
+
+                submit = this.submitPhone;
+            } else {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.field_handled_externally'
+                            defaultMessage='This field is handled through your login provider. If you want to change it, you need to do so through your login provider.'
+                        />
+                    </span>
+                );
+            }
+
+            max = (
+                <SettingItemMax
+                    title={formatMessage(holders.phone)}
+                    inputs={inputs}
+                    submit={submit}
+                    saving={this.state.sectionIsSaving}
+                    serverError={this.state.serverError}
+                    clientError={this.state.clientError}
+                    updateSection={this.updateSection}
+                    extraInfo={extraInfo}
+                />
+            );
+        }
+
+        let describe: JSX.Element | string = '';
+        if (phone) {
+            describe = phone;
+        } else {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.emptyPhone'
+                    defaultMessage="Click 'Edit' to add your phone number"
+                />
+            );
+            if (this.props.isMobileView) {
+                describe = (
+                    <FormattedMessage
+                        id='user.settings.general.mobile.emptyPhone'
+                        defaultMessage='Click to add your phone number'
+                    />
+                );
+            }
+        }
+
+        return (
+            <SettingItem
+                active={active}
+                areAllSectionsInactive={this.props.activeSection === ''}
+                title={formatMessage(holders.phone)}
+                describe={describe}
+                section={'phone'}
+                updateSection={this.updateSection}
+                max={max}
+            />
+        );
+    };
+
     render() {
         const nameSection = this.createNameSection();
         const nicknameSection = this.createNicknameSection();
@@ -1364,6 +1595,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         const positionSection = this.createPositionSection();
         const emailSection = this.createEmailSection();
         const pictureSection = this.createPictureSection();
+        const phoneSection = this.createPhoneSection();
 
         return (
             <div id='generalSettings'>
@@ -1421,6 +1653,12 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     {this.props.itemsToHide?.includes('picture') ? null : (
                         <>
                             {pictureSection}
+                            <div className='divider-dark'/>
+                        </>
+                    )}
+                    {this.props.itemsToHide?.includes('phone') ? null : (
+                        <>
+                            {phoneSection}
                             <div className='divider-dark'/>
                         </>
                     )}

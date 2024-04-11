@@ -321,3 +321,37 @@ export const getIsFilterApplied = createSelector(
     getStaffFilterParams,
     (params) => Object.values(params).some((x) => Boolean(x)),
 );
+
+export const getMyInfo = createSelector(
+    'getMyInfo',
+    (s: any) => getRemoTalkPluginState(s)?.myInfo,
+    (info) => {
+        if (!info) {
+            return undefined;
+        }
+        const {
+            authId,
+            startAt,
+            endAt,
+            phone,
+            hospitals,
+            departments,
+            professions,
+        } = info;
+        return {
+            authId: typeof authId === 'number' ? authId : 0,
+            startAt: typeof startAt === 'number' ? startAt : 0,
+            endAt: typeof endAt === 'number' ? endAt : 0,
+            phone: typeof phone === 'string' ? phone : '',
+            hospitals,
+            departments,
+            professions,
+        };
+    },
+);
+
+export const getMyPhoneNumber = createSelector(
+    'getMyPhoneNumber',
+    getMyInfo,
+    (info) => info?.phone ?? '',
+);

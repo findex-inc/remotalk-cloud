@@ -592,10 +592,10 @@ export function updateMyFindexUserInfo(user: UserProfile, patch: {
             data.last_name = patch.last_name;
         }
         if (typeof patch.first_name !== 'undefined') {
-            user.first_name = patch.first_name;
+            data.first_name = patch.first_name;
         }
         if (typeof patch.email !== 'undefined') {
-            user.email = patch.email;
+            data.email = patch.email;
         }
         if (typeof patch.phone !== 'undefined') {
             actions.push({type: 'UPDATED_STAFF_PHONE', data: patch.phone});

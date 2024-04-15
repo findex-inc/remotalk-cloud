@@ -27,6 +27,10 @@ export type Props = {
     setRequireConfirm: () => void;
     pluginSettings: {[tabName: string]: PluginConfiguration};
     phone?: string;
+    hospitalIds?: number[];
+    departmentIds?: number[];
+    professionIds?: number[];
+    authId?: number;
 };
 
 export default function UserSettings(props: Props) {
@@ -41,6 +45,10 @@ export default function UserSettings(props: Props) {
                     closeModal={props.closeModal}
                     collapseModal={props.collapseModal}
                     phone={props.phone}
+                    hospitalIds={props.hospitalIds}
+                    departmentIds={props.departmentIds}
+                    professionIds={props.professionIds}
+                    authId={props.authId}
                 />
             </div>
         );

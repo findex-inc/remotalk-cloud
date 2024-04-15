@@ -34,6 +34,10 @@ export type Props = {
     // For RemoTalk plugin
     hideSecurity?: boolean;
     phone?: string;
+    hospitalIds?: number[];
+    departmentIds?: number[];
+    professionIds?: number[];
+    authId?: number;
 }
 
 type State = {
@@ -344,6 +348,10 @@ class UserSettingsModal extends React.PureComponent<Props, State> {
                                 pluginSettings={this.props.pluginSettings}
                                 user={this.props.currentUser}
                                 phone={this.props.phone}
+                                hospitalIds={this.props.hospitalIds}
+                                departmentIds={this.props.departmentIds}
+                                professionIds={this.props.professionIds}
+                                authId={this.props.authId}
                             />
                         </div>
                     </div>

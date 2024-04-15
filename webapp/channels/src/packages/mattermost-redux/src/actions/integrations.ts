@@ -606,3 +606,55 @@ export function updateMyFindexUserInfo(user: UserProfile, patch: {
         return {data: true};
     };
 }
+
+export function updateBelongingDepartments(staffId: number, ids: number[]): ActionFuncAsync {
+    return async (dispatch) => {
+        dispatch({type: UserTypes.UPDATE_ME_REQUEST, data: null});
+        const relations = ids.map((id) => ({
+            staff_id: staffId,
+            department_id: id,
+        }));
+
+        let data;
+        try {
+            data = await Client4.updateBelongingDepartments(relations);
+        } catch (error) {
+            dispatch({type: UserTypes.UPDATE_ME_FAILURE, error});
+            dispatch(logError(error));
+            return {error};
+        }
+
+        dispatch(batchActions([
+            {type: UserTypes.UPDATE_ME_SUCCESS},
+            {type: 'UPDATED_BELONGING_DEPARTMENTS', data},
+        ]));
+
+        return {data: true};
+    };
+}
+
+export function updateAssignedProfessions(staffId: number, ids: number[]): ActionFuncAsync {
+    return async (dispatch) => {
+        dispatch({type: UserTypes.UPDATE_ME_REQUEST, data: null});
+        const relations = ids.map((id) => ({
+            staff_id: staffId,
+            profession_id: id,
+        }));
+
+        let data;
+        try {
+            data = await Client4.updateAssignedProfessions(relations);
+        } catch (error) {
+            dispatch({type: UserTypes.UPDATE_ME_FAILURE, error});
+            dispatch(logError(error));
+            return {error};
+        }
+
+        dispatch(batchActions([
+            {type: UserTypes.UPDATE_ME_SUCCESS},
+            {type: 'UPDATED_ASSIGNED_PROFESSIONS', data},
+        ]));
+
+        return {data: true};
+    };
+}

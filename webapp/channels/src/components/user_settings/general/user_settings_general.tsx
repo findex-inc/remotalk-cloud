@@ -98,6 +98,26 @@ const holders = defineMessages({
         id: 'user.settings.general.phone',
         defaultMessage: 'Phone',
     },
+    hospitals: {
+        id: 'user.settings.general.hospitals',
+        defaultMessage: 'Hospitals',
+    },
+    departments: {
+        id: 'user.settings.general.departments',
+        defaultMessage: 'Departments',
+    },
+    professions: {
+        id: 'user.settings.general.professions',
+        defaultMessage: 'Professions',
+    },
+    authIdValid: {
+        id: 'user.settings.general.authIdValid',
+        defaultMessage: 'Authentication ID is 0 or empty.',
+    },
+    selectionEmpty: {
+        id: 'user.settings.general.selectionEmpty',
+        defaultMessage: 'Please select at least one option.',
+    },
 });
 
 export type Props = {
@@ -120,6 +140,8 @@ export type Props = {
 
         // For RemoTalk plugin
         updateMyFindexUserInfo?: (user: UserProfile, patch: {last_name?: string; first_name?: string; email?: string; phone?: string}) => Promise<ActionResult>;
+        updateBelongingDepartments?: (staffId: number, ids: number[]) => Promise<ActionResult>;
+        updateAssignedProfessions?: (staffId: number, ids: number[]) => Promise<ActionResult>;
     };
     requireEmailVerification?: boolean;
     ldapFirstNameAttributeSet?: boolean;
@@ -133,8 +155,16 @@ export type Props = {
     ldapPictureAttributeSet?: boolean;
 
     // For RemoTalk plugin
+    remotalkPluginEnabled?: boolean;
     itemsToHide?: string[];
     phone?: string;
+    hospitals?: Array<{value: number; name: string}>;
+    departments?: Array<{value: number; name: string}>;
+    professions?: Array<{value: number; name: string}>;
+    hospitalIds?: number[];
+    departmentIds?: number[];
+    professionIds?: number[];
+    authId?: number;
 }
 
 type State = {
@@ -158,6 +188,8 @@ type State = {
 
     // For RemoTalk plugin
     phone: string;
+    departmentIds: number[];
+    professionIds: number[];
 }
 
 export class UserSettingsGeneralTab extends PureComponent<Props, State> {
@@ -484,6 +516,84 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         this.submitFindexUser(user, {phone});
     };
 
+    submitDepartments = () => {
+        const authId = this.props.authId ?? 0;
+        const ids = this.state.departmentIds;
+        const currentIds = this.props.departmentIds ?? [];
+        const {formatMessage} = this.props.intl;
+
+        if (!authId) {
+            this.setState({clientError: formatMessage(holders.authIdValid)});
+            return;
+        }
+        if (!ids.length) {
+            this.setState({clientError: formatMessage(holders.selectionEmpty)});
+            return;
+        }
+        if (ids.length === currentIds.length && ids.every((x) => currentIds.includes(x))) {
+            this.updateSection('');
+            return;
+        }
+
+        if (!this.props.actions.updateBelongingDepartments) {
+            return;
+        }
+        this.setState({sectionIsSaving: true});
+        this.props.actions.updateBelongingDepartments(authId, ids).
+            then(({data, error: err}) => {
+                if (data) {
+                    this.updateSection('');
+                } else if (err) {
+                    let serverError;
+                    if (err.message) {
+                        serverError = err.message;
+                    } else {
+                        serverError = err;
+                    }
+                    this.setState({serverError, emailError: '', clientError: '', sectionIsSaving: false});
+                }
+            });
+    };
+
+    submitProfessions = () => {
+        const authId = this.props.authId ?? 0;
+        const ids = this.state.professionIds;
+        const currentIds = this.props.professionIds ?? [];
+        const {formatMessage} = this.props.intl;
+
+        if (!authId) {
+            this.setState({clientError: formatMessage(holders.authIdValid)});
+            return;
+        }
+        if (!ids.length) {
+            this.setState({clientError: formatMessage(holders.selectionEmpty)});
+            return;
+        }
+        if (ids.length === currentIds.length && ids.every((x) => currentIds.includes(x))) {
+            this.updateSection('');
+            return;
+        }
+
+        if (!this.props.actions.updateAssignedProfessions) {
+            return;
+        }
+        this.setState({sectionIsSaving: true});
+        this.props.actions.updateAssignedProfessions(authId, ids).
+            then(({data, error: err}) => {
+                if (data) {
+                    this.updateSection('');
+                } else if (err) {
+                    let serverError;
+                    if (err.message) {
+                        serverError = err.message;
+                    } else {
+                        serverError = err;
+                    }
+                    this.setState({serverError, emailError: '', clientError: '', sectionIsSaving: false});
+                }
+            });
+    };
+
     updateUsername = (e: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({username: e.target.value});
     };
@@ -531,6 +641,32 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         this.setState({phone: e.target.value});
     };
 
+    updateDepartmentIds = (id: number, checked: boolean) => {
+        this.setState((prev) => {
+            const {departmentIds: ids} = prev;
+            const index = ids.indexOf(id);
+            if (checked && index < 0) {
+                return {...prev, departmentIds: ids.concat(id)};
+            } else if (!checked && index >= 0) {
+                return {...prev, departmentIds: ids.slice(0, index).concat(ids.slice(index + 1))};
+            }
+            return prev;
+        });
+    };
+
+    updateProfessionIds = (id: number, checked: boolean) => {
+        this.setState((prev) => {
+            const {professionIds: ids} = prev;
+            const index = ids.indexOf(id);
+            if (checked && index < 0) {
+                return {...prev, professionIds: ids.concat(id)};
+            } else if (!checked && index >= 0) {
+                return {...prev, professionIds: ids.slice(0, index).concat(ids.slice(index + 1))};
+            }
+            return prev;
+        });
+    };
+
     updateSection = (section: string) => {
         this.setState(Object.assign({}, this.setupInitialState(this.props), {clientError: '', serverError: '', emailError: '', sectionIsSaving: false}));
         this.submitActive = false;
@@ -556,6 +692,8 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
             showSpinner: false,
             serverError: '',
             phone: props.phone ?? '',
+            departmentIds: props.departmentIds ?? [],
+            professionIds: props.professionIds ?? [],
         };
     }
 
@@ -678,7 +816,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     );
                 }
 
-                submit = this.props.user.auth_service === Constants.FINDEX_SERVICE ? this.submitFindexEmail : this.submitEmail;
+                submit = (this.props.remotalkPluginEnabled && this.props.user.auth_service === Constants.FINDEX_SERVICE) ? this.submitFindexEmail : this.submitEmail;
             } else if (this.props.user.auth_service === Constants.GITLAB_SERVICE) {
                 inputs.push(
                     <div
@@ -1019,7 +1157,7 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                     </span>
                 );
 
-                submit = this.props.user.auth_service === Constants.FINDEX_SERVICE ? this.submitFindexName : this.submitName;
+                submit = (this.props.remotalkPluginEnabled && this.props.user.auth_service === Constants.FINDEX_SERVICE) ? this.submitFindexName : this.submitName;
             }
 
             max = (
@@ -1534,8 +1672,8 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                 extraInfo = (
                     <span>
                         <FormattedMessage
-                            id='user.settings.general.field_handled_externally'
-                            defaultMessage='This field is handled through your login provider. If you want to change it, you need to do so through your login provider.'
+                            id='user.settings.general.field_not_exists'
+                            defaultMessage='You do not have this field.'
                         />
                     </span>
                 );
@@ -1588,6 +1726,305 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         );
     };
 
+    createHospitalsSection = () => {
+        const user = this.props.user;
+        const hospitals = this.props.hospitals ?? [];
+        const hospitalIds = this.props.hospitalIds ?? [];
+        const hospitalsStr = hospitals.filter((x) => hospitalIds.includes(x.value)).
+            map((x) => x.name).
+            join(', ');
+        const {formatMessage} = this.props.intl;
+
+        const active = this.props.activeSection === 'hospitals';
+        let max = null;
+        if (active) {
+            let extraInfo: JSX.Element | string = (
+                <span>
+                    <FormattedMessage
+                        id='user.settings.general.field_not_exists'
+                        defaultMessage='You do not have this field.'
+                    />
+                </span>
+            );
+
+            if (user.auth_service === Constants.FINDEX_SERVICE) {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.hospitals_contact_admin'
+                            defaultMessage='You belong to {hospitals}. If you want to change it, please contact an administrator.'
+                            values={{
+                                hospitals: hospitalsStr,
+                            }}
+                        />
+                    </span>
+                );
+
+                if (!hospitalIds.length) {
+                    extraInfo = (
+                        <span>
+                            <FormattedMessage
+                                id='user.settings.general.empty_hospitals_contact_admin'
+                                defaultMessage='You do not belong to any hospitals. If you want to change it, please contact an administrator.'
+                            />
+                        </span>
+                    );
+                }
+            }
+
+            max = (
+                <SettingItemMax
+                    title={formatMessage(holders.hospitals)}
+                    updateSection={this.updateSection}
+                    extraInfo={extraInfo}
+                />
+            );
+        }
+
+        let describe: JSX.Element | string = '';
+        if (hospitalIds.length) {
+            describe = hospitalsStr;
+        } else {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.emptyHospitals'
+                    defaultMessage='You do not belong to any hospitals'
+                />
+            );
+        }
+
+        return (
+            <SettingItem
+                active={active}
+                areAllSectionsInactive={this.props.activeSection === ''}
+                title={formatMessage(holders.hospitals)}
+                describe={describe}
+                section='hospitals'
+                updateSection={this.updateSection}
+                max={max}
+            />
+        );
+    };
+
+    createDepartmentsSection = () => {
+        const user = this.props.user;
+        const departments = this.props.departments ?? [];
+        const departmentIds = this.props.departmentIds ?? [];
+        const {formatMessage} = this.props.intl;
+
+        const active = this.props.activeSection === 'departments';
+        let max = null;
+        if (active) {
+            const inputs = [];
+
+            let extraInfo: JSX.Element | string = '';
+            let submit = null;
+
+            if (user.auth_service === Constants.FINDEX_SERVICE) {
+                inputs.push(
+                    <div
+                        key='departmentsSetting'
+                        className='form-group'
+                    >
+                        <ListInfo
+                            options={departments.filter((x) => this.state.departmentIds.includes(x.value))}
+                            emptyLabel={(
+                                <FormattedMessage
+                                    id='user.settings.general.empty_departments'
+                                    defaultMessage='You do not belong to any departments'
+                                />
+                            )}
+                        />
+                        <div
+                            className='divider-dark'
+                            style={{marginTop: '5px'}}
+                        />
+                        <ListSelector
+                            options={departments}
+                            selected={this.state.departmentIds}
+                            onSelectionChange={this.updateDepartmentIds}
+                        />
+                    </div>,
+                );
+
+                submit = this.submitDepartments;
+            } else if (user.auth_service === Constants.PSC_SERVICE) {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.field_handled_by_his'
+                            defaultMessage='This field is handled by HIS. If you want to change it, you need to do so through HIS (it will takes a moment until the change applies to RemoTalk).'
+                        />
+                    </span>
+                );
+            } else {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.field_not_exists'
+                            defaultMessage='You do not have this field.'
+                        />
+                    </span>
+                );
+            }
+
+            max = (
+                <SettingItemMax
+                    title={formatMessage(holders.departments)}
+                    inputs={inputs}
+                    submit={submit}
+                    saving={this.state.sectionIsSaving}
+                    serverError={this.state.serverError}
+                    clientError={this.state.clientError}
+                    updateSection={this.updateSection}
+                    extraInfo={extraInfo}
+                />
+            );
+        }
+
+        let describe: JSX.Element | string = '';
+        if (departmentIds.length) {
+            describe = departments.filter((x) => departmentIds.includes(x.value)).
+                map((x) => x.name).
+                join(', ');
+        } else {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.emptyDepartments'
+                    defaultMessage="Click 'Edit' to add your departments"
+                />
+            );
+            if (this.props.isMobileView) {
+                describe = (
+                    <FormattedMessage
+                        id='user.settings.general.mobile.emptyDepartments'
+                        defaultMessage='Click to add your departments'
+                    />
+                );
+            }
+        }
+
+        return (
+            <SettingItem
+                active={active}
+                areAllSectionsInactive={this.props.activeSection === ''}
+                title={formatMessage(holders.departments)}
+                describe={describe}
+                section={'departments'}
+                updateSection={this.updateSection}
+                max={max}
+            />
+        );
+    };
+
+    createProfessionsSection = () => {
+        const user = this.props.user;
+        const professions = this.props.professions ?? [];
+        const professionIds = this.props.professionIds ?? [];
+        const {formatMessage} = this.props.intl;
+
+        const active = this.props.activeSection === 'professions';
+        let max = null;
+        if (active) {
+            const inputs = [];
+
+            let extraInfo: JSX.Element | string = '';
+            let submit = null;
+
+            if (user.auth_service === Constants.FINDEX_SERVICE) {
+                inputs.push(
+                    <div
+                        key='professionsSetting'
+                        className='form-group'
+                    >
+                        <ListInfo
+                            options={professions.filter((x) => this.state.professionIds.includes(x.value))}
+                            emptyLabel={(
+                                <FormattedMessage
+                                    id='user.settings.general.empty_professions'
+                                    defaultMessage='You are not assigned to any professions'
+                                />
+                            )}
+                        />
+                        <div className='divider-dark'/>
+                        <ListSelector
+                            options={professions}
+                            selected={this.state.professionIds}
+                            onSelectionChange={this.updateProfessionIds}
+                        />
+                    </div>,
+                );
+
+                submit = this.submitProfessions;
+            } else if (user.auth_service === Constants.PSC_SERVICE) {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.field_handled_by_his'
+                            defaultMessage='This field is handled by HIS. If you want to change it, you need to do so through HIS (it will takes a moment until the change applies to RemoTalk).'
+                        />
+                    </span>
+                );
+            } else {
+                extraInfo = (
+                    <span>
+                        <FormattedMessage
+                            id='user.settings.general.field_not_exists'
+                            defaultMessage='You do not have this field.'
+                        />
+                    </span>
+                );
+            }
+
+            max = (
+                <SettingItemMax
+                    title={formatMessage(holders.professions)}
+                    inputs={inputs}
+                    submit={submit}
+                    saving={this.state.sectionIsSaving}
+                    serverError={this.state.serverError}
+                    clientError={this.state.clientError}
+                    updateSection={this.updateSection}
+                    extraInfo={extraInfo}
+                />
+            );
+        }
+
+        let describe: JSX.Element | string = '';
+        if (professionIds.length) {
+            describe = professions.filter((x) => professionIds.includes(x.value)).
+                map((x) => x.name).
+                join(', ');
+        } else {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.general.emptyProfessions'
+                    defaultMessage="Click 'Edit' to add your professions"
+                />
+            );
+            if (this.props.isMobileView) {
+                describe = (
+                    <FormattedMessage
+                        id='user.settings.general.mobile.emptyProfessions'
+                        defaultMessage='Click to add your professions'
+                    />
+                );
+            }
+        }
+
+        return (
+            <SettingItem
+                active={active}
+                areAllSectionsInactive={this.props.activeSection === ''}
+                title={formatMessage(holders.professions)}
+                describe={describe}
+                section={'professions'}
+                updateSection={this.updateSection}
+                max={max}
+            />
+        );
+    };
+
     render() {
         const nameSection = this.createNameSection();
         const nicknameSection = this.createNicknameSection();
@@ -1596,6 +2033,9 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
         const emailSection = this.createEmailSection();
         const pictureSection = this.createPictureSection();
         const phoneSection = this.createPhoneSection();
+        const hospitalsSection = this.createHospitalsSection();
+        const departmentsSection = this.createDepartmentsSection();
+        const professionsSection = this.createProfessionsSection();
 
         return (
             <div id='generalSettings'>
@@ -1656,9 +2096,27 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
                             <div className='divider-dark'/>
                         </>
                     )}
-                    {this.props.itemsToHide?.includes('phone') ? null : (
+                    {!this.props.remotalkPluginEnabled || this.props.itemsToHide?.includes('phone') ? null : (
                         <>
                             {phoneSection}
+                            <div className='divider-dark'/>
+                        </>
+                    )}
+                    {!this.props.remotalkPluginEnabled || this.props.itemsToHide?.includes('hospitals') ? null : (
+                        <>
+                            {hospitalsSection}
+                            <div className='divider-dark'/>
+                        </>
+                    )}
+                    {!this.props.remotalkPluginEnabled || this.props.itemsToHide?.includes('departments') ? null : (
+                        <>
+                            {departmentsSection}
+                            <div className='divider-dark'/>
+                        </>
+                    )}
+                    {!this.props.remotalkPluginEnabled || this.props.itemsToHide?.includes('professions') ? null : (
+                        <>
+                            {professionsSection}
                             <div className='divider-dark'/>
                         </>
                     )}
@@ -1669,3 +2127,49 @@ export class UserSettingsGeneralTab extends PureComponent<Props, State> {
 }
 
 export default injectIntl(UserSettingsGeneralTab);
+
+function ListSelector(props: {
+    options: Array<{value: number; name: string}>;
+    selected: number[];
+    onSelectionChange: (value: number, checked: boolean) => void;
+}) {
+    return (
+        <div
+            style={{maxHeight: '200px', overflow: 'auto', display: 'flex', flexDirection: 'column'}}
+        >
+            {props.options.map((o) => (
+                <label key={o.value}>
+                    <input
+                        type='checkbox'
+                        style={{marginRight: '10px'}}
+                        checked={props.selected.includes(o.value)}
+                        onChange={(e) => props.onSelectionChange(o.value, e.target.checked)}
+                    />
+                    {o.name}
+                </label>
+            ))}
+        </div>
+    );
+}
+
+function ListInfo(props: {
+    options: Array<{value: number; name: string}>;
+    emptyLabel: JSX.Element | string;
+}) {
+    if (!props.options.length) {
+        return (
+            <span>{props.emptyLabel}</span>
+        );
+    }
+    return (
+        <>
+            {props.options.map((o) => (
+                <span
+                    key={o.value}
+                    className='bg-info'
+                    style={{borderRadius: '3px', padding: '0 2px 0 2px', margin: '1px 2px 1px 2px'}}
+                >{o.name}</span>
+            ))}
+        </>
+    );
+}

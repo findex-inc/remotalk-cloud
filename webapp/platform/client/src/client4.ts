@@ -4420,6 +4420,20 @@ export default class Client4 {
             body: JSON.stringify(patch),
         });
     };
+
+    updateBelongingDepartments = (relations: Array<{staff_id: number; department_id: number}>) => {
+        return this.doFetch<Array<{staff_id: number; department_id: number}>>(`${this.getRemoTalkV1Route()}/staffs/me/departments`, {
+            method: 'post',
+            body: JSON.stringify(relations),
+        });
+    };
+
+    updateAssignedProfessions = (relations: Array<{staff_id: number; profession_id: number}>) => {
+        return this.doFetch<Array<{staff_id: number; profession_id: number}>>(`${this.getRemoTalkV1Route()}/staffs/me/professions`, {
+            method: 'post',
+            body: JSON.stringify(relations),
+        });
+    };
 }
 
 export function parseAndMergeNestedHeaders(originalHeaders: any) {

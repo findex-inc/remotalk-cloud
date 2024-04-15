@@ -201,10 +201,21 @@ export function getTenantInfo(s: any) {
     if (!tenant) {
         return undefined;
     }
-    return tenant as {
-        hospitals?: {[id: string]: {id: number; name: string; sort?: number}};
-        departments?: {[id: string]: {id: number; name: string; sort?: number}};
-        professions?: {[id: string]: {id: number; name: string; sort?: number}};
+    const {
+        hospitals,
+        hospitalOrder,
+        departments,
+        departmentOrder,
+        professions,
+        professionOrder,
+    } = tenant;
+    return {
+        hospitals: typeof hospitals === 'object' ? hospitals : undefined,
+        hospitalOrder: Array.isArray(hospitalOrder) ? hospitalOrder : undefined,
+        departments: typeof departments === 'object' ? departments : undefined,
+        departmentOrder: Array.isArray(departmentOrder) ? departmentOrder : undefined,
+        professions: typeof professions === 'object' ? professions : undefined,
+        professionOrder: Array.isArray(professionOrder) ? professionOrder : undefined,
     };
 }
 
@@ -215,7 +226,13 @@ export const getHospitals = createSelector(
         if (!t || !t.hospitals) {
             return [];
         }
-        return Object.values(t.hospitals).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+        const order = t.hospitalOrder;
+        if (order && order.length === Object.keys(t.hospitals).length) {
+            return order.map((id) => t.hospitals[id] as {id: number; name: string; sort?: number});
+        }
+        return Object.values(t.hospitals).
+            map((x) => x as {id: number; name: string; sort?: number}).
+            sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
     },
 );
 
@@ -226,7 +243,13 @@ export const getDepartments = createSelector(
         if (!t || !t.departments) {
             return [];
         }
-        return Object.values(t.departments).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+        const order = t.departmentOrder;
+        if (order && order.length === Object.keys(t.departments).length) {
+            return order.map((id) => t.departments[id] as {id: number; name: string; sort?: number});
+        }
+        return Object.values(t.departments).
+            map((x) => x as {id: number; name: string; sort?: number}).
+            sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
     },
 );
 
@@ -237,7 +260,13 @@ export const getProfessions = createSelector(
         if (!t || !t.professions) {
             return [];
         }
-        return Object.values(t.professions).sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
+        const order = t.professionOrder;
+        if (order && order.length === Object.keys(t.professions).length) {
+            return order.map((id) => t.professions[id] as {id: number; name: string; sort?: number});
+        }
+        return Object.values(t.professions).
+            map((x) => x as {id: number; name: string; sort?: number}).
+            sort((a, b) => (a.sort ?? a.id) - (b.sort ?? b.id));
     },
 );
 
@@ -343,9 +372,9 @@ export const getMyInfo = createSelector(
             startAt: typeof startAt === 'number' ? startAt : 0,
             endAt: typeof endAt === 'number' ? endAt : 0,
             phone: typeof phone === 'string' ? phone : '',
-            hospitals,
-            departments,
-            professions,
+            hospitals: typeof hospitals === 'object' ? hospitals : undefined,
+            departments: typeof departments === 'object' ? departments : undefined,
+            professions: typeof professions === 'object' ? professions : undefined,
         };
     },
 );
@@ -354,4 +383,61 @@ export const getMyPhoneNumber = createSelector(
     'getMyPhoneNumber',
     getMyInfo,
     (info) => info?.phone ?? '',
+);
+
+export const getMyHospitalIds = createSelector(
+    'getMyHospitalIds',
+    getMyInfo,
+    (info) => {
+        if (!info) {
+            return [];
+        }
+        const {hospitals} = info;
+        if (!hospitals) {
+            return [];
+        }
+        return Object.keys(hospitals).
+            map((x) => Number.parseInt(x, 10)).
+            filter((x) => x && !Number.isNaN(x));
+    },
+);
+
+export const getMyDepartmentIds = createSelector(
+    'getMyDepartmentIds',
+    getMyInfo,
+    (info) => {
+        if (!info) {
+            return [];
+        }
+        const {departments} = info;
+        if (!departments) {
+            return [];
+        }
+        return Object.keys(departments).
+            map((x) => Number.parseInt(x, 10)).
+            filter((x) => x && !Number.isNaN(x));
+    },
+);
+
+export const getMyProfessionIds = createSelector(
+    'getMyProfessionIds',
+    getMyInfo,
+    (info) => {
+        if (!info) {
+            return [];
+        }
+        const {professions} = info;
+        if (!professions) {
+            return [];
+        }
+        return Object.keys(professions).
+            map((x) => Number.parseInt(x, 10)).
+            filter((x) => x && !Number.isNaN(x));
+    },
+);
+
+export const getMyAuthId = createSelector(
+    'getMyAuthId',
+    getMyInfo,
+    (info) => info?.authId ?? 0,
 );

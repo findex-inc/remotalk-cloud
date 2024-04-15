@@ -6,7 +6,7 @@ import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
 import {clearErrors, logError} from 'mattermost-redux/actions/errors';
-import {updateMyFindexUserInfo} from 'mattermost-redux/actions/integrations';
+import {updateAssignedProfessions, updateBelongingDepartments, updateMyFindexUserInfo} from 'mattermost-redux/actions/integrations';
 import {
     updateMe,
     sendVerificationEmail,
@@ -15,7 +15,7 @@ import {
 } from 'mattermost-redux/actions/users';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import {getUserProfileItemsToHide} from 'selectors/plugins';
+import {getDepartments, getHospitals, getProfessions, getUserProfileItemsToHide, isRemoTalkPluginEnabled} from 'selectors/plugins';
 import {getIsMobileView} from 'selectors/views/browser';
 
 import type {GlobalState} from 'types/store';
@@ -38,7 +38,11 @@ function mapStateToProps(state: GlobalState) {
     const ldapPictureAttributeSet = config.LdapPictureAttributeSet === 'true';
 
     // For RemoTalk plugin
+    const remotalkPluginEnabled = isRemoTalkPluginEnabled(state);
     const itemsToHide = getUserProfileItemsToHide(state);
+    const hospitals = getHospitals(state).map((h) => ({value: h.id, name: h.name}));
+    const departments = getDepartments(state).map((d) => ({value: d.id, name: d.name}));
+    const professions = getProfessions(state).map((p) => ({value: p.id, name: p.name}));
 
     return {
         isMobileView: getIsMobileView(state),
@@ -53,7 +57,11 @@ function mapStateToProps(state: GlobalState) {
         samlPositionAttributeSet,
         ldapPositionAttributeSet,
         ldapPictureAttributeSet,
+        remotalkPluginEnabled,
         itemsToHide,
+        hospitals,
+        departments,
+        professions,
     };
 }
 
@@ -69,6 +77,8 @@ function mapDispatchToProps(dispatch: Dispatch) {
 
             // For RemoTalk plugin
             updateMyFindexUserInfo,
+            updateBelongingDepartments,
+            updateAssignedProfessions,
         }, dispatch),
     };
 }

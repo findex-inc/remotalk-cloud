@@ -1,12 +1,13 @@
-FROM node:18.17 AS client
+FROM node:20.11 AS client
 
 RUN apt-get update && apt-get install -y make gcc nasm libpng-dev
+RUN npm config set registry http://registry.npmjs.org/
 
 COPY ./webapp /home/webapp
 WORKDIR /home/webapp
 RUN make dist
 
-FROM golang:1.20 AS server
+FROM golang:1.21.8 AS server
 
 RUN apt-get update && apt-get install -y make gcc curl
 

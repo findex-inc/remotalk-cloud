@@ -45,6 +45,7 @@ import SubMenuModal from 'components/widgets/menu/menu_modals/submenu_modal/subm
 import WebSocketClient from 'client/web_websocket_client';
 import {getHistory} from 'utils/browser_history';
 import {ActionTypes, PostTypes, RHSStates, ModalIdentifiers, PreviousViewedTypes} from 'utils/constants';
+import DesktopApp from 'utils/desktop_api';
 import {filterAndSortTeamsByDisplayName} from 'utils/team_utils';
 import * as Utils from 'utils/utils';
 
@@ -260,6 +261,7 @@ export function emitUserLoggedOutEvent(redirectTo = '/', shouldSignalLogout = tr
     dispatch(logout()).then(() => {
         if (shouldSignalLogout) {
             BrowserStore.signalLogout();
+            DesktopApp.signalLogout();
         }
 
         WebsocketActions.close();

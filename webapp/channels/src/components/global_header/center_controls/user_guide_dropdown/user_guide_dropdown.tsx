@@ -20,7 +20,8 @@ import {ModalIdentifiers} from 'utils/constants';
 import type {PropsFromRedux} from './index';
 
 const mattermostUserGuideLink = 'https://docs.mattermost.com/guides/use-mattermost.html';
-const trainingResourcesLink = 'https://academy.mattermost.com/';
+
+// const trainingResourcesLink = 'https://academy.mattermost.com/';
 const askTheCommunityUrl = 'https://mattermost.com/pl/default-ask-mattermost-community/';
 
 type Props = WrappedComponentProps & PropsFromRedux & {
@@ -79,18 +80,19 @@ class UserGuideDropdown extends React.PureComponent<Props, State> {
 
         return (
             <Menu.Group>
-                <Menu.ItemExternalLink
-                    id='mattermostUserGuideLink'
-                    iconClassName='icon-file-text-outline'
-                    url={mattermostUserGuideLink}
-                    text={intl.formatMessage({id: 'userGuideHelp.mattermostUserGuide', defaultMessage: 'Mattermost user guide'})}
-                />
-                {this.props.helpLink && (
+                {this.props.helpLink ? ( // For RemoTalk
                     <Menu.ItemExternalLink
-                        id='trainingResourcesLink'
+                        id='helpResourcesLink'
                         iconClassName='icon-lightbulb-outline'
-                        url={trainingResourcesLink}
-                        text={intl.formatMessage({id: 'userGuideHelp.trainingResources', defaultMessage: 'Training resources'})}
+                        url={this.props.helpLink}
+                        text={intl.formatMessage({id: 'userGuideHelp.helpResources', defaultMessage: 'Help resources'})}
+                    />
+                ) : (
+                    <Menu.ItemExternalLink
+                        id='mattermostUserGuideLink'
+                        iconClassName='icon-file-text-outline'
+                        url={mattermostUserGuideLink}
+                        text={intl.formatMessage({id: 'userGuideHelp.mattermostUserGuide', defaultMessage: 'Mattermost user guide'})}
                     />
                 )}
                 {this.props.enableAskCommunityLink === 'true' && (

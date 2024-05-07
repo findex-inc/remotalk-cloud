@@ -86,7 +86,8 @@ function shouldFetch(req) {
         return (
             u.origin !== self.location.origin ||
             !u.pathname.startsWith("/static") ||
-            req.method !== "GET"
+            req.method !== "GET" ||
+            u.pathname.endsWith(".js")
         );
     } catch {
         return true;

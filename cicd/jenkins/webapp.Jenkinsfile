@@ -2,8 +2,6 @@
 
 def currentStage = ''
 
-def commitHash = sh(script: '''git show --format='%h' --no-patch''', returnStdout: true)
-
 pipeline{
   agent{
       label 'jammy'
@@ -31,7 +29,14 @@ pipeline{
       }
       steps {
         script { currentStage = env.STAGE_NAME }
-        sh 'docker build -f Dockerfile -t ${remotalk_image_tag} --progress=plain --build-arg CURRENT_COMMIT_HASH="${commitHash}" .'
+        sh '''
+          docker build -f Dockerfile \
+            -t ${remotalk_image_tag} \
+            --progress=plain \
+            --build-arg \
+              CURRENT_COMMIT_HASH="$(git show --format='%h' --no-patch)" \
+            .
+        '''
       }
     }
     stage('Push RemoTalk Image to Artifact Registry') {

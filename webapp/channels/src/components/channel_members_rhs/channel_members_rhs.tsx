@@ -50,6 +50,9 @@ export interface Props {
     canManageMembers: boolean;
     editing: boolean;
 
+    // For RemoTalk plugin
+    hideUsername?: boolean;
+
     actions: {
         openModal: <P>(modalData: ModalData<P>) => void;
         openDirectChannelToUserId: (userId: string) => Promise<{data: Channel}>;
@@ -84,6 +87,7 @@ export default function ChannelMembersRHS({
     channelMembers,
     canManageMembers,
     editing = false,
+    hideUsername = false,
     actions,
 }: Props) {
     const history = useHistory();
@@ -289,6 +293,7 @@ export default function ChannelMembersRHS({
                         loadMore={loadMore}
                         hasNextPage={channelMembers.length < membersCount}
                         isNextPageLoading={isNextPageLoading}
+                        hideUsername={hideUsername}
                     />
                 )}
             </MembersContainer>

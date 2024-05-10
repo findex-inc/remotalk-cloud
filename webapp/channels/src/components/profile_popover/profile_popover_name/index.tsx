@@ -14,11 +14,15 @@ type Props = {
     haveOverrideProp: boolean;
     user: UserProfile;
     fullname: string;
+
+    // For RemoTalk plugin
+    hideUsername: boolean;
 }
 const ProfilePopoverName = ({
     user,
     haveOverrideProp,
     fullname,
+    hideUsername,
 }: Props) => {
     return (
         <>
@@ -32,10 +36,11 @@ const ProfilePopoverName = ({
                 haveOverrideProp={haveOverrideProp}
                 isBot={user.is_bot}
             />
-            <UserName
-                hasFullName={Boolean(fullname)}
-                username={user.username}
-            />
+            {!hideUsername && // For RemoTalk plugin
+                <UserName
+                    hasFullName={Boolean(fullname)}
+                    username={user.username}
+                />}
             <Position
                 haveOverrideProp={haveOverrideProp}
                 position={user.position}

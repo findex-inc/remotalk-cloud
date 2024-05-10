@@ -33,6 +33,7 @@ import {loadProfilesAndReloadChannelMembers, searchProfilesAndChannelMembers} fr
 import {openModal} from 'actions/views/modals';
 import {closeRightHandSide, goBack, setEditChannelMembers} from 'actions/views/rhs';
 import {setChannelMembersRhsSearchTerm} from 'actions/views/search';
+import {getHideUsername} from 'selectors/plugins';
 import {getIsEditingMembers, getPreviousRhsState} from 'selectors/rhs';
 
 import {Constants, RHSStates} from 'utils/constants';
@@ -143,6 +144,9 @@ function mapStateToProps(state: GlobalState) {
 
     const currentUserIsChannelAdmin = currentUser && currentUser.scheme_admin;
 
+    // For RemoTalk plugin
+    const hideUsername = getHideUsername(state);
+
     return {
         channel,
         currentUserIsChannelAdmin,
@@ -153,6 +157,7 @@ function mapStateToProps(state: GlobalState) {
         canManageMembers,
         channelMembers,
         editing,
+        hideUsername,
     } as Props;
 }
 

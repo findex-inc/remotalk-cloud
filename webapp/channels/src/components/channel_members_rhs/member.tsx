@@ -105,6 +105,9 @@ interface Props {
     index: number;
     totalUsers: number;
     editing: boolean;
+
+    // For RemoTalk plugin
+    hideUsername: boolean;
     actions: {
         openDirectMessage: (user: UserProfile) => void;
     };
@@ -114,7 +117,7 @@ interface MMOverlayTrigger extends BaseOverlayTrigger {
     hide: () => void;
 }
 
-const Member = ({className, channel, member, index, totalUsers, editing, actions}: Props) => {
+const Member = ({className, channel, member, index, totalUsers, editing, hideUsername, actions}: Props) => {
     const overlay = React.createRef<MMOverlayTrigger>();
     const profileSrc = Client4.getProfilePictureUrl(member.user.id, member.user.last_picture_update);
 
@@ -164,7 +167,7 @@ const Member = ({className, channel, member, index, totalUsers, editing, actions
                             {isGuest(member.user.roles) && <GuestTag/>}
                         </DisplayName>
                         {
-                            member.displayName === member.user.username ? null : <Username>{'@'}{member.user.username}</Username>
+                            hideUsername || member.displayName === member.user.username ? null : <Username>{'@'}{member.user.username}</Username>
                         }
                         <CustomStatusEmoji
                             userID={member.user.id}

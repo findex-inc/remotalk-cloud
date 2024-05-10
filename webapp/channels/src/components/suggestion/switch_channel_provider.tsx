@@ -48,6 +48,7 @@ import {sortChannelsByTypeAndDisplayName, isChannelMuted} from 'mattermost-redux
 import {getPreferenceKey} from 'mattermost-redux/utils/preference_utils';
 import {isGuest} from 'mattermost-redux/utils/user_utils';
 
+import {getHideUsername} from 'selectors/plugins';
 import {getPostDraft} from 'selectors/rhs';
 import globalStore from 'stores/redux_store';
 
@@ -118,10 +119,13 @@ type Props = SuggestionProps<WrappedChannel> & {
     isPartOfOnlyOneTeam: boolean;
     status?: string;
     team?: Team;
+
+    // For RemoTalk plugin
+    hideUsername?: boolean;
 }
 
 const SwitchChannelSuggestion = React.forwardRef<HTMLDivElement, Props>((props, ref) => {
-    const {item, status, collapsedThreads, team, isPartOfOnlyOneTeam} = props;
+    const {item, status, collapsedThreads, team, isPartOfOnlyOneTeam, hideUsername} = props;
     const channel = item.channel;
     const channelIsArchived = channel.delete_at && channel.delete_at !== 0;
 
@@ -150,7 +154,9 @@ const SwitchChannelSuggestion = React.forwardRef<HTMLDivElement, Props>((props, 
     }
 
     let name = channel.display_name;
-    let description = '~' + channel.name;
+
+    // For RemoTalk plugin
+    let description = hideUsername ? '' : '~' + channel.name;
     let icon;
     if (channelIsArchived) {
         icon = (
@@ -223,7 +229,12 @@ const SwitchChannelSuggestion = React.forwardRef<HTMLDivElement, Props>((props, 
         }
 
         if (channel.display_name && !(teammate && teammate.is_bot)) {
-            description = '@' + teammate.username + deactivated;
+            // For RemoTalk plugin
+            if (hideUsername) {
+                description = deactivated;
+            } else {
+                description = '@' + teammate.username + deactivated;
+            }
         } else {
             name = teammate.username;
             if (teammate.id === currentUserId) {
@@ -306,6 +317,9 @@ function mapStateToPropsForSwitchChannelSuggestion(state: GlobalState, ownProps:
 
     const isPartOfOnlyOneTeam = getMyTeams(state).length === 1;
 
+    // For RemoTalk plugin
+    const hideUsername = getHideUsername(state);
+
     return {
         channelMember: getMyChannelMemberships(state)[channelId],
         hasDraft: draft && Boolean(draft.message.trim() || draft.fileInfos.length || draft.uploadsInProgress.length),
@@ -314,6 +328,7 @@ function mapStateToPropsForSwitchChannelSuggestion(state: GlobalState, ownProps:
         collapsedThreads,
         team,
         isPartOfOnlyOneTeam,
+        hideUsername,
     };
 }
 

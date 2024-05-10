@@ -9,11 +9,13 @@ RUN make dist
 
 FROM golang:1.21.8 AS server
 
+ARG CURRENT_COMMIT_HASH
+
 RUN apt-get update && apt-get install -y make gcc curl
 
 COPY ./server /go/src/server
 WORKDIR /go/src/server
-RUN make setup-go-work build-linux
+RUN BUILD_NUMBER=${CURRENT_COMMIT_HASH} make setup-go-work build-linux
 
 COPY NOTICE.txt /go/src/
 COPY README.md /go/src/

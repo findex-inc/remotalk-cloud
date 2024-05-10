@@ -20,6 +20,7 @@ import {displayUsername} from 'mattermost-redux/utils/user_utils';
 
 import {openDirectChannelToUserId} from 'actions/channel_actions';
 import {closeModal} from 'actions/views/modals';
+import {getHideUsername} from 'selectors/plugins';
 import {isModalOpen} from 'selectors/views/modals';
 
 import MemberList from 'components/channel_members_rhs/member_list';
@@ -80,6 +81,9 @@ function NotificationFromMembersModal(props: Props) {
     const userStatuses = useSelector(getUserStatuses);
     const displaySetting = useSelector(getTeammateNameDisplaySetting);
     const show = useSelector((state: GlobalState) => isModalOpen(state, ModalIdentifiers.SUM_OF_MEMBERS_MODAL));
+
+    // For RemoTalk plugin
+    const hideUsername = useSelector(getHideUsername);
 
     const members: ListItem[] = props.userIds.map((userId: string) => {
         const user = userProfiles[userId];
@@ -144,6 +148,7 @@ function NotificationFromMembersModal(props: Props) {
                     loadMore={loadMore}
                     hasNextPage={false}
                     isNextPageLoading={false}
+                    hideUsername={hideUsername}
                 />
             </MembersContainer>
         </GenericModal>

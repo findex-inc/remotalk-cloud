@@ -36,6 +36,9 @@ export interface Props {
     hasNextPage: boolean;
     isNextPageLoading: boolean;
     searchTerms: string;
+
+    // For RemoTalk plugin
+    hideUsername: boolean;
     openDirectMessage: (user: UserProfile) => void;
     loadMore: () => void;
 }
@@ -47,6 +50,7 @@ const MemberList = ({
     members,
     searchTerms,
     editing,
+    hideUsername,
     openDirectMessage,
     loadMore,
 }: Props) => {
@@ -107,6 +111,7 @@ const MemberList = ({
                             member={member}
                             editing={editing}
                             actions={{openDirectMessage}}
+                            hideUsername={hideUsername}
                         />
                     </div>
                 );

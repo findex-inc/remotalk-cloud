@@ -41,8 +41,8 @@ type FilterParams = {
 
 export type Props = {
     currentUserId: string;
-    currentTeamId: string;
-    currentTeamName: string;
+    currentTeamId?: string;
+    currentTeamName?: string;
     searchTerm: string;
     users: UserProfile[];
     totalCount: number;
@@ -278,7 +278,7 @@ export default class MoreDirectChannels extends React.PureComponent<Props, State
                 this.setUsersLoadingState(false);
             });
         } else {
-            this.props.actions.getProfilesInTeam(this.props.currentTeamId, pageNum, USERS_PER_PAGE * 2).then(() => {
+            this.props.actions.getProfilesInTeam(this.props.currentTeamId || '', pageNum, USERS_PER_PAGE * 2).then(() => {
                 this.setUsersLoadingState(false);
             });
         }

@@ -86,8 +86,8 @@ const makeMapStateToProps = () => {
         const isFilterApplied = getIsFilterApplied(state);
 
         return {
-            currentTeamId: team.id,
-            currentTeamName: team.name,
+            currentTeamId: team?.id,
+            currentTeamName: team?.name,
             searchTerm,
             users,
             currentChannelMembers,

@@ -32,7 +32,7 @@ import PluggableIntroButtons from './pluggable_intro_buttons';
 
 type Props = {
     currentUserId: string;
-    channel: Channel;
+    channel?: Channel;
     fullWidth: boolean;
     locale: string;
     channelProfiles: UserProfileType[];
@@ -57,6 +57,10 @@ type Props = {
 
 export default class ChannelIntroMessage extends React.PureComponent<Props> {
     toggleFavorite = () => {
+        if (!this.props.channel) {
+            return;
+        }
+
         if (this.props.isFavorite) {
             this.props.actions.unfavoriteChannel(this.props.channel.id);
         } else {
@@ -94,6 +98,10 @@ export default class ChannelIntroMessage extends React.PureComponent<Props> {
         let centeredIntro = '';
         if (!fullWidth) {
             centeredIntro = 'channel-intro--centered';
+        }
+
+        if (!channel) {
+            return null;
         }
 
         if (channel.type === Constants.DM_CHANNEL) {

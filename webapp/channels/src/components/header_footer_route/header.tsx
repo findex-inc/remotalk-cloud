@@ -5,7 +5,7 @@ import React from 'react';
 import {useSelector} from 'react-redux';
 import {Link} from 'react-router-dom';
 
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
+import {getConfig, getLicense} from 'mattermost-redux/selectors/entities/general';
 
 import BackButton from 'components/common/back_button';
 import Logo from 'components/common/svg_images_components/logo_dark_blue_svg';
@@ -19,9 +19,24 @@ export type HeaderProps = {
 }
 
 const Header = ({alternateLink, backButtonURL, onBackButtonClick}: HeaderProps) => {
-    const {EnableCustomBrand, SiteName} = useSelector(getConfig);
+    const {SiteName, EnableCustomBrand} = useSelector(getConfig);
+    const license = useSelector(getLicense);
 
     const ariaLabel = EnableCustomBrand === 'true' && SiteName ? SiteName : 'RemoTalk';
+
+    let freeBanner = null;
+    if (license.IsLicensed === 'false') {
+        freeBanner = <><Logo/><span className='freeBadge'>{'FREE EDITION'}</span></>;
+    }
+
+    let title: React.ReactNode = SiteName;
+    if (title === 'Mattermost') {
+        if (freeBanner) {
+            title = '';
+        } else {
+            title = <Logo/>;
+        }
+    }
 
     return (
         <div className='hfroute-header'>

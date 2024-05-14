@@ -16,10 +16,12 @@ import {setUrl} from 'mattermost-redux/actions/general';
 import {Client4} from 'mattermost-redux/client';
 import {rudderAnalytics, RudderTelemetryHandler} from 'mattermost-redux/client/rudder';
 import type {Theme} from 'mattermost-redux/selectors/entities/preferences';
+import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 import type {ActionResult} from 'mattermost-redux/types/actions';
 
 import {measurePageLoadTelemetry, temporarilySetPageLoadContext, trackEvent, trackSelectorMetrics} from 'actions/telemetry_actions.jsx';
 import BrowserStore from 'stores/browser_store';
+import store from 'stores/redux_store';
 
 import AccessProblem from 'components/access_problem';
 import AnnouncementBarController from 'components/announcement_bar';

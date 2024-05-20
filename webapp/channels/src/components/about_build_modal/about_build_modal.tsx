@@ -65,12 +65,14 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
             );
         }
 
+        /*
         let title = (
             <FormattedMessage
                 id='about.teamEditiont0'
                 defaultMessage='Team Edition'
             />
         );
+        */
 
         let subTitle = (
             <FormattedMessage
@@ -79,6 +81,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
             />
         );
 
+        /*
         let learnMore = (
             <div>
                 <FormattedMessage
@@ -93,15 +96,18 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                 </ExternalLink>
             </div>
         );
+        */
 
         let licensee;
         if (config.BuildEnterpriseReady === 'true') {
+            /*
             title = (
                 <FormattedMessage
                     id='about.teamEditiont1'
                     defaultMessage='Enterprise Edition'
                 />
             );
+            */
 
             subTitle = (
                 <FormattedMessage
@@ -110,6 +116,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                 />
             );
 
+            /*
             learnMore = (
                 <div>
                     <FormattedMessage
@@ -124,14 +131,17 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                     </ExternalLink>
                 </div>
             );
+            */
 
             if (license.IsLicensed === 'true') {
+                /*
                 title = (
                     <FormattedMessage
                         id='about.enterpriseEditione1'
                         defaultMessage='Enterprise Edition'
                     />
                 );
+                */
                 licensee = (
                     <div className='form-group'>
                         <FormattedMessage
@@ -213,7 +223,8 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                         <div>
                             <h3 className='about-modal__title'>
                                 <strong>
-                                    {'Mattermost'} {title}
+                                    {/* {'Mattermost'} {title} */}
+                                    {'RemoTalk'}
                                 </strong>
                             </h3>
                             <p className='about-modal__subtitle pb-2'>
@@ -223,7 +234,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                                 <div data-testid='aboutModalVersion'>
                                     <FormattedMessage
                                         id='about.version'
-                                        defaultMessage='Mattermost Version:'
+                                        defaultMessage='Server Version:'
                                     />
                                     <span id='versionString'>
                                         {'\u00a0' + mmversion}
@@ -251,7 +262,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                         </div>
                     </div>
                     <div className='about-modal__footer'>
-                        {learnMore}
+                        {/* {learnMore} */}
                         <div className='form-group'>
                             <div className='about-modal__copyright'>
                                 <FormattedMessage
@@ -269,7 +280,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                             </div>
                         </div>
                     </div>
-                    <div className='about-modal__notice form-group pt-3'>
+                    {/* <div className='about-modal__notice form-group pt-3'>
                         <p>
                             <FormattedMessage
                                 id='about.notice'
@@ -302,7 +313,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                                 }}
                             />
                         </p>
-                    </div>
+                    </div> */}
                     <div className='about-modal__hash'>
                         <p>
                             <FormattedMessage

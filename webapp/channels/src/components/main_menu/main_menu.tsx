@@ -193,15 +193,6 @@ export class MainMenu extends React.PureComponent<Props> {
                     </SystemPermissionGate>
                 </Menu.Group>
                 <Menu.Group>
-                    <SystemPermissionGate
-                        permissions={[Permissions.SYSCONSOLE_WRITE_ABOUT_EDITION_AND_LICENSE]}
-                    >
-                        <Menu.StartTrial
-                            id='startTrial'
-                        />
-                    </SystemPermissionGate>
-                </Menu.Group>
-                <Menu.Group>
                     <Menu.ItemAction
                         id='recentMentions'
                         onClick={this.searchMentions}

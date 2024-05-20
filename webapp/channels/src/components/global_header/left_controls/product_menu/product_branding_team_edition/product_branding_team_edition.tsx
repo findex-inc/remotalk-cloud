@@ -21,23 +21,6 @@ const StyledLogo = styled(Logo)`
     }
 `;
 
-const Badge = styled.div`
-    display: flex;
-    align-self: center;
-    padding: 2px 6px;
-    position: relative;
-    top: 1px;
-    border-radius: var(--radius-s);
-    margin-left: 12px;
-    background: rgba(var(--sidebar-text-rgb), 0.08);
-    color: rgba(var(--sidebar-text-rgb), 0.75);
-    font-family: 'Open Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.025em;
-    line-height: 16px;
-`;
-
 const ProductBrandingTeamEdition = (): JSX.Element => {
     return (
         <ProductBrandingTeamEditionContainer tabIndex={0}>
@@ -45,7 +28,6 @@ const ProductBrandingTeamEdition = (): JSX.Element => {
                 width={116}
                 height={20}
             />
-            <Badge>{'FREE EDITION'}</Badge>
         </ProductBrandingTeamEditionContainer>
     );
 };

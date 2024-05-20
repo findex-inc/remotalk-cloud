@@ -16,12 +16,10 @@ import {setUrl} from 'mattermost-redux/actions/general';
 import {Client4} from 'mattermost-redux/client';
 import {rudderAnalytics, RudderTelemetryHandler} from 'mattermost-redux/client/rudder';
 import type {Theme} from 'mattermost-redux/selectors/entities/preferences';
-import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 import type {ActionResult} from 'mattermost-redux/types/actions';
 
 import {measurePageLoadTelemetry, temporarilySetPageLoadContext, trackEvent, trackSelectorMetrics} from 'actions/telemetry_actions.jsx';
 import BrowserStore from 'stores/browser_store';
-import store from 'stores/redux_store';
 
 import AccessProblem from 'components/access_problem';
 import AnnouncementBarController from 'components/announcement_bar';
@@ -153,6 +151,7 @@ type Props = {
     actions: Actions;
     plugins?: PluginComponent[];
     products: ProductComponent[];
+    userId?: string;
     showLaunchingWorkspace: boolean;
     rhsIsExpanded: boolean;
     rhsIsOpen: boolean;
@@ -372,7 +371,6 @@ export default class Root extends React.PureComponent<Props, State> {
         ) {
             this.setRootMeta();
         }
-        console.log(`redirectTimeout: ${this.redirectTimeout}, using: ${this.props.usingTMService}`);
         if (!this.redirectTimeout) {
             this.redirectToFdxLoginLogoutEndpoint(1000);
         }
@@ -383,11 +381,10 @@ export default class Root extends React.PureComponent<Props, State> {
         if (
             window.location.pathname === '/login' &&
             !query.get('fdx_login_completed') &&
-            !getCurrentUser(store.getState()) &&
+            !this.props.userId &&
             this.props.usingTMService
         ) {
             this.redirectTimeout = window.setTimeout(() => {
-                console.log('redirecting to /fdx/login');
                 const params = new URLSearchParams(window.location.search);
                 params.append('fdx_login_at', new Date().getTime().toString());
                 window.location.href = '/plugins/jp.co.findex.remotalk-plugin/fdx/login?' + params.toString();
@@ -446,11 +443,9 @@ export default class Root extends React.PureComponent<Props, State> {
     }
 
     componentWillUnmount() {
-        console.log('root.tsx is unmounting...');
         this.mounted = false;
         window.removeEventListener('storage', this.handleLogoutLoginSignal);
         if (this.redirectTimeout) {
-            console.log('clear redirect timeout');
             window.clearTimeout(this.redirectTimeout);
         }
     }

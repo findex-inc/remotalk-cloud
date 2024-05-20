@@ -53,6 +53,7 @@ function mapStateToProps(state: GlobalState) {
         showTermsOfService,
         plugins,
         products,
+        userId,
         showLaunchingWorkspace: getShowLaunchingWorkspace(state),
         rhsIsExpanded: getIsRhsExpanded(state),
         rhsIsOpen: getIsRhsOpen(state),

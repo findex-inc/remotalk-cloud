@@ -133,7 +133,7 @@ const Member = ({className, channel, member, index, totalUsers, editing, hideUse
                         {isGuest(member.user.roles) && <GuestTag/>}
                     </DisplayName>
                     {
-                        member.displayName === member.user.username ? null : <Username>{'@'}{member.user.username}</Username>
+                        hideUsername || member.displayName === member.user.username ? null : <Username>{'@'}{member.user.username}</Username>
                     }
                     <CustomStatusEmoji
                         userID={member.user.id}

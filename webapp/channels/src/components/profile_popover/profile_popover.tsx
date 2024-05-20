@@ -13,6 +13,7 @@ import {openDirectChannelToUserId} from 'actions/channel_actions';
 import * as GlobalActions from 'actions/global_actions';
 import {closeModal} from 'actions/views/modals';
 import {getMembershipForEntities} from 'actions/views/profile_popover';
+import {getHideUsername} from 'selectors/plugins';
 import {getSelectedPost} from 'selectors/rhs';
 import {getIsMobileView} from 'selectors/views/browser';
 
@@ -81,6 +82,7 @@ const ProfilePopover = ({
     const status = useSelector((state: GlobalState) => getStatusForUserId(state, userId) || UserStatuses.OFFLINE);
     const currentUserTimezone = useSelector(getCurrentTimezone);
     const currentUserId = useSelector(getCurrentUserId);
+    const hideUsername = useSelector(getHideUsername);
 
     const [loadingDMChannel, setLoadingDMChannel] = useState<string>();
 
@@ -176,6 +178,7 @@ const ProfilePopover = ({
                     user={user}
                     haveOverrideProp={haveOverrideProp}
                     fullname={fullname}
+                    hideUsername={hideUsername}
                 />
                 <hr/>
                 <ProfilePopoverEmail

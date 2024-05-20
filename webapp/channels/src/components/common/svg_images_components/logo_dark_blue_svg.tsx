@@ -2,14 +2,23 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import styled from 'styled-components';
 
 type Props = {
     width?: number;
     height?: number;
+    className?: string;
 }
 
+const Svg = styled.svg.attrs({
+    version: '1.1',
+    xmlns: 'http://www.w3.org/2000/svg',
+    xmlnsXlink: 'http://www.w3.org/1999/xlink',
+})``;
+
 export default (props: Props) => (
-    <svg
+    <Svg
+        className={props.className}
         width={props.width ? props.width.toString() : '182'}
         height={props.height ? props.height.toString() : '30'}
         viewBox='0 0 360 72'
@@ -65,5 +74,5 @@ export default (props: Props) => (
                 H31.5z M21.9,42.5h7c2.6,0,5-1.1,6.8-2.8l0.1-0.1l6.8-6.8H21.9V42.5z'
             />
         </g>
-    </svg>
+    </Svg>
 );

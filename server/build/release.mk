@@ -178,6 +178,11 @@ package-plugins: fetch-prepackaged-plugins
 		fi; \
 	done
 
+	@# Findex prepackage plugins
+	@for plugin_package in $(FDX_PLUGIN_PACKAGES) ; do \
+		cp fdx_plugins/$$plugin_package.tar.gz $(DIST_PATH_GENERIC)/prepackaged_plugins; \
+	done
+
 package-osx-amd64: package-prep
 	DIST_PATH_GENERIC=$(DIST_PATH_OSX_AMD64) CURRENT_PACKAGE_ARCH=darwin_amd64 MM_BIN_NAME=mattermost MMCTL_BIN_NAME=mmctl $(MAKE) package-general
 	@# Package

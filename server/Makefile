@@ -154,6 +154,10 @@ PLUGIN_PACKAGES += mattermost-plugin-servicenow-v2.3.4
 PLUGIN_PACKAGES += mattermost-plugin-zoom-v1.8.0
 PLUGIN_PACKAGES += mattermost-plugin-ai-v0.6.3
 
+# Findex Plugins Packages
+FDX_PLUGIN_PACKAGES ?= $(FDX_PLUGIN_PACKAGES:)
+FDX_PLUGIN_PACKAGES += jp.co.findex.remotalk-plugin-0.5.4
+
 EE_PACKAGES=$(shell $(GO) list $(BUILD_ENTERPRISE_DIR)/...)
 
 ifeq ($(BUILD_ENTERPRISE_READY),true)

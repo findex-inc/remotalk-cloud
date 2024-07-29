@@ -49,7 +49,7 @@ func (w *Web) InitStatic() {
 		w.MainRouter.Handle("/robots.txt", http.HandlerFunc(robotsHandler))
 		w.MainRouter.Handle("/unsupported_browser.js", http.HandlerFunc(unsupportedBrowserScriptHandler))
 		w.MainRouter.Handle("/{sw_js:.*sw\\.js$}", http.HandlerFunc(SWScriptHandler))
-		w.MainRouter.Handle("/{anything:.*}", w.NewStaticHandler(root)).Methods("GET")
+		w.MainRouter.Handle("/{anything:.*}", w.NewStaticHandler(root)).Methods(http.MethodGet)
 
 		// When a subpath is defined, it's necessary to handle redirects without a
 		// trailing slash. We don't want to use StrictSlash on the w.MainRouter and affect

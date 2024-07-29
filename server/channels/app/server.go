@@ -28,6 +28,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/mattermost/mattermost/server/public/model"
+	"github.com/mattermost/mattermost/server/public/shared/httpservice"
 	"github.com/mattermost/mattermost/server/public/shared/i18n"
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 	"github.com/mattermost/mattermost/server/public/shared/request"
@@ -40,6 +41,7 @@ import (
 	"github.com/mattermost/mattermost/server/v8/channels/jobs"
 	"github.com/mattermost/mattermost/server/v8/channels/jobs/active_users"
 	"github.com/mattermost/mattermost/server/v8/channels/jobs/cleanup_desktop_tokens"
+	"github.com/mattermost/mattermost/server/v8/channels/jobs/delete_dms_preferences_migration"
 	"github.com/mattermost/mattermost/server/v8/channels/jobs/delete_empty_drafts_migration"
 	"github.com/mattermost/mattermost/server/v8/channels/jobs/delete_orphan_drafts_migration"
 	"github.com/mattermost/mattermost/server/v8/channels/jobs/expirynotify"
@@ -66,7 +68,6 @@ import (
 	"github.com/mattermost/mattermost/server/v8/einterfaces"
 	"github.com/mattermost/mattermost/server/v8/platform/services/awsmeter"
 	"github.com/mattermost/mattermost/server/v8/platform/services/cache"
-	"github.com/mattermost/mattermost/server/v8/platform/services/httpservice"
 	"github.com/mattermost/mattermost/server/v8/platform/services/remotecluster"
 	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/bleveengine"
 	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/bleveengine/indexer"
@@ -1351,6 +1352,10 @@ func (s *Server) doLicenseExpirationCheck() {
 		return
 	}
 
+	if license.IsCloud() {
+		return
+	}
+
 	users, err := s.Store().User().GetSystemAdminProfiles()
 	if err != nil {
 		mlog.Error("Failed to get system admins for license expired message from Mattermost.")
@@ -1598,6 +1603,11 @@ func (s *Server) initJobs() {
 		export_users_to_csv.MakeWorker(s.Jobs, s.Store(), New(ServerConnector(s.Channels()))),
 		nil,
 	)
+
+	s.Jobs.RegisterJobType(
+		model.JobTypeDeleteDmsPreferencesMigration,
+		delete_dms_preferences_migration.MakeWorker(s.Jobs, s.Store(), New(ServerConnector(s.Channels()))),
+		nil)
 
 	s.platform.Jobs = s.Jobs
 }

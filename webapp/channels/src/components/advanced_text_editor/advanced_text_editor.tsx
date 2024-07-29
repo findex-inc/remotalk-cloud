@@ -19,6 +19,7 @@ import {getCurrentUserId, isCurrentUserGuestUser, getStatusForUserId, makeGetDis
 import * as GlobalActions from 'actions/global_actions';
 import {actionOnGlobalItemsWithPrefix} from 'actions/storage';
 import {removeDraft, updateDraft} from 'actions/views/drafts';
+import {canCreatePostToTownSquare} from 'selectors/plugins';
 import {makeGetDraft} from 'selectors/rhs';
 import {connectionErrorCount} from 'selectors/views/system';
 import LocalStorageStore from 'stores/local_storage_store';
@@ -113,7 +114,18 @@ const AdvanceTextEditor = ({
 
     const canPost = useSelector((state: GlobalState) => {
         const channel = getChannel(state, channelId);
-        return channel ? haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST) : false;
+
+        // For RemoTalk plugin
+        if (!channel) {
+            return false;
+        }
+        if (!haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST)) {
+            return false;
+        }
+        if (channel.name === Constants.DEFAULT_CHANNEL) {
+            return canCreatePostToTownSquare(state);
+        }
+        return true;
     });
     const useChannelMentions = useSelector((state: GlobalState) => {
         const channel = getChannel(state, channelId);

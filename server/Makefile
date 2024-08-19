@@ -157,7 +157,7 @@ PLUGIN_PACKAGES += focalboard-v8.0.0
 
 # Findex Plugins Packages
 FDX_PLUGIN_PACKAGES ?= $(FDX_PLUGIN_PACKAGES:)
-FDX_PLUGIN_PACKAGES += jp.co.findex.remotalk-plugin-0.5.6
+FDX_PLUGIN_PACKAGES += jp.co.findex.remotalk-plugin-0.6.0-alpha.1
 
 EE_PACKAGES=$(shell $(GO) list $(BUILD_ENTERPRISE_DIR)/...)
 

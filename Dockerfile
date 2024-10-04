@@ -5,9 +5,9 @@ RUN npm config set registry http://registry.npmjs.org/
 
 COPY ./webapp /home/webapp
 WORKDIR /home/webapp
-RUN make dist
+RUN CI=true make dist
 
-FROM golang:1.21.8 AS server
+FROM golang:1.22.6 AS server
 
 ARG CURRENT_COMMIT_HASH
 

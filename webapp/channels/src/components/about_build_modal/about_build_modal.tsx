@@ -7,11 +7,8 @@ import {FormattedMessage} from 'react-intl';
 
 import type {ClientConfig, ClientLicense} from '@mattermost/types/config';
 
-import ExternalLink from 'components/external_link';
 import Nbsp from 'components/html_entities/nbsp';
 import MattermostLogo from 'components/widgets/icons/mattermost_logo';
-
-import {AboutLinks} from 'utils/constants';
 
 import AboutBuildModalCloud from './about_build_modal_cloud/about_build_modal_cloud';
 
@@ -154,31 +151,31 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
             }
         }
 
-        const termsOfService = (
-            <ExternalLink
-                location='about_build_modal'
-                id='tosLink'
-                href={AboutLinks.TERMS_OF_SERVICE}
-            >
-                <FormattedMessage
-                    id='about.tos'
-                    defaultMessage='Terms of Use'
-                />
-            </ExternalLink>
-        );
+        // const termsOfService = (
+        //     <ExternalLink
+        //         location='about_build_modal'
+        //         id='tosLink'
+        //         href={AboutLinks.TERMS_OF_SERVICE}
+        //     >
+        //         <FormattedMessage
+        //             id='about.tos'
+        //             defaultMessage='Terms of Use'
+        //         />
+        //     </ExternalLink>
+        // );
 
-        const privacyPolicy = (
-            <ExternalLink
-                id='privacyLink'
-                location='about_build_modal'
-                href={AboutLinks.PRIVACY_POLICY}
-            >
-                <FormattedMessage
-                    id='about.privacy'
-                    defaultMessage='Privacy Policy'
-                />
-            </ExternalLink>
-        );
+        // const privacyPolicy = (
+        //     <ExternalLink
+        //         id='privacyLink'
+        //         location='about_build_modal'
+        //         href={AboutLinks.PRIVACY_POLICY}
+        //     >
+        //         <FormattedMessage
+        //             id='about.privacy'
+        //             defaultMessage='Privacy Policy'
+        //         />
+        //     </ExternalLink>
+        // );
 
         const buildnumber: JSX.Element | null = (
             <div data-testid='aboutModalBuildNumber'>
@@ -261,8 +258,8 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                             {licensee}
                         </div>
                     </div>
-                    <div className='about-modal__footer'>
-                        {/* {learnMore} */}
+                    {/* <div className='about-modal__footer'>
+                        {learnMore}
                         <div className='form-group'>
                             <div className='about-modal__copyright'>
                                 <FormattedMessage
@@ -279,7 +276,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                                 {privacyPolicy}
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                     {/* <div className='about-modal__notice form-group pt-3'>
                         <p>
                             <FormattedMessage

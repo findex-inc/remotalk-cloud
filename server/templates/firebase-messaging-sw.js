@@ -75,6 +75,42 @@ async function deleteAllCaches() {
     await Promise.all(cacheNames.map((x) => caches.delete(x)));
 }
 
+async function cacheIconFiles() {
+    const paths = [
+        '/static/images/favicon/favicon-default-16x16.png',
+        '/static/images/favicon/favicon-default-24x24.png',
+        '/static/images/favicon/favicon-default-32x32.png',
+        '/static/images/favicon/favicon-default-64x64.png',
+        '/static/images/favicon/favicon-default-96x96.png',
+        '/static/icon_96x96.png',
+        '/static/icon_76x76.png',
+        '/static/icon_72x72.png',
+        '/static/icon_60x60.png',
+        '/static/icon_57x57.png',
+        '/static/icon_32x32.png',
+        '/static/icon_16x16.png',
+        '/static/icon_192x192.png',
+        '/static/icon_152x152.png',
+        '/static/icon_144x144.png',
+        '/static/icon_120x120.png',
+        '/static/manifest.json',
+    ]
+    try {
+        const cache = await caches.open(CACHE_NAME);
+        const promises = paths.map(async (path) => {
+            const resp = await fetch(path, {method: 'GET'});
+            if (resp.ok) {
+                cache.put(path, resp);
+            } else {
+                console.error('Failed to fetch ' + path);
+            }
+        });
+        await Promise.all(promises);
+    } catch (error) {
+        console.error('An error occurred while caching icons');
+    }
+}
+
 /**
  *
  * @param {Request} req
@@ -138,6 +174,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
     const onActivate = Promise.all([
         self.clients.claim(),
+        cacheIconFiles(),
     ]);
     event.waitUntil(onActivate);
 });
@@ -149,17 +186,6 @@ self.addEventListener("fetch", (event) => {
         return;
     }
     event.respondWith(respondWithCache(requestToFetch));
-});
-
-self.addEventListener("message", (event) => {
-    if (event.data.type === "CACHE_URLS") {
-        const urlsToAdd = event.data.payload;
-        event.waitUntil(
-            caches.open(CACHE_NAME).then((cache) => {
-                return cache.addAll(urlsToAdd);
-            })
-        );
-    }
 });
 
 self.addEventListener("push", (event) => {

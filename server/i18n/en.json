@@ -153,7 +153,7 @@
   },
   {
     "id": "api.admin.test_email.body",
-    "translation": "It appears your Mattermost email is setup correctly!"
+    "translation": "It appears your RemoTalk email is setup correctly!"
   },
   {
     "id": "api.admin.test_email.missing_server",
@@ -165,7 +165,7 @@
   },
   {
     "id": "api.admin.test_email.subject",
-    "translation": "Mattermost - Testing Email Settings"
+    "translation": "RemoTalk - Testing Email Settings"
   },
   {
     "id": "api.admin.test_s3.missing_s3_bucket",
@@ -201,7 +201,7 @@
   },
   {
     "id": "api.bot.teams_channels.add_message_mobile",
-    "translation": "Please add me to teams and channels you want me to interact in. To do this, use the browser or Mattermost Desktop App."
+    "translation": "Please add me to teams and channels you want me to interact in. To do this, use the browser or RemoTalk Desktop App."
   },
   {
     "id": "api.channel.add_guest.added",
@@ -621,7 +621,7 @@
   },
   {
     "id": "api.command.invite_people.desc",
-    "translation": "Send an email invite to your Mattermost team"
+    "translation": "Send an email invite to your RemoTalk team"
   },
   {
     "id": "api.command.invite_people.email_invitations_off",
@@ -972,7 +972,7 @@
   },
   {
     "id": "api.command_help.desc",
-    "translation": "Show Mattermost help message"
+    "translation": "Show RemoTalk help message"
   },
   {
     "id": "api.command_help.name",
@@ -980,7 +980,7 @@
   },
   {
     "id": "api.command_help.success",
-    "translation": "Mattermost is an open source platform for secure communication, collaboration, and orchestration of work across tools and teams.\r\nMattermost contains two key tools:\r\n\r\n**Channels** - Stay connected with your team via 1:1 and group messaging.\r\n**[Playbooks](/playbooks)** - Build and configure repeatable processes to achieve specific and predictable outcomes.\r\n\r\n[View documentation and guides]({{.HelpLink}})"
+    "translation": "RemoTalk is an open source platform for secure communication, collaboration, and orchestration of work across tools and teams.\r\nRemoTalk contains two key tools:\r\n\r\n**Channels** - Stay connected with your team via 1:1 and group messaging.\r\n**[Playbooks](/playbooks)** - Build and configure repeatable processes to achieve specific and predictable outcomes.\r\n\r\n[View documentation and guides]({{.HelpLink}})"
   },
   {
     "id": "api.command_invite.channel.app_error",
@@ -1103,7 +1103,7 @@
   },
   {
     "id": "api.command_logout.desc",
-    "translation": "Logout of Mattermost"
+    "translation": "Logout of RemoTalk"
   },
   {
     "id": "api.command_logout.name",
@@ -1231,7 +1231,7 @@
   },
   {
     "id": "api.command_remote.accept.help",
-    "translation": "Accept an invitation from an external Mattermost instance"
+    "translation": "Accept an invitation from an external RemoTalk instance"
   },
   {
     "id": "api.command_remote.accept_invitation",
@@ -1259,7 +1259,7 @@
   },
   {
     "id": "api.command_remote.desc",
-    "translation": "Invite secure connections for communication across Mattermost instances."
+    "translation": "Invite secure connections for communication across RemoTalk instances."
   },
   {
     "id": "api.command_remote.displayname.help",
@@ -1307,7 +1307,7 @@
   },
   {
     "id": "api.command_remote.invite_summary",
-    "translation": "Send the following AES 256-bit encrypted invitation to the external Mattermost System Admin along with the password. They will use the `{{.Command}}` slash command to accept the invitation.\n\n```\n{{.Invitation}}\n```\n\n**Ensure the secure connection can access your Mattermost instance via** {{.SiteURL}}"
+    "translation": "Send the following AES 256-bit encrypted invitation to the external RemoTalk System Admin along with the password. They will use the `{{.Command}}` slash command to accept the invitation.\n\n```\n{{.Invitation}}\n```\n\n**Ensure the secure connection can access your RemoTalk instance via** {{.SiteURL}}"
   },
   {
     "id": "api.command_remote.missing_command",
@@ -1483,7 +1483,7 @@
   },
   {
     "id": "api.command_share.desc",
-    "translation": "Shares the current channel with an external Mattermost instance."
+    "translation": "Shares the current channel with an external RemoTalk instance."
   },
   {
     "id": "api.command_share.fetch_remote.error",
@@ -1507,7 +1507,7 @@
   },
   {
     "id": "api.command_share.invite_remote.help",
-    "translation": "Invites an external Mattermost instance to the current shared channel"
+    "translation": "Invites an external RemoTalk instance to the current shared channel"
   },
   {
     "id": "api.command_share.invite_remote_to_channel.error",
@@ -1651,7 +1651,7 @@
   },
   {
     "id": "api.config.update.elasticsearch.autocomplete_cannot_be_enabled_error",
-    "translation": "Channel autocomplete cannot be enabled as channel index schema is out of date. It is recommended to regenerate your channel index. See the Mattermost changelog for more information"
+    "translation": "Channel autocomplete cannot be enabled as channel index schema is out of date. It is recommended to regenerate your channel index. See the RemoTalk changelog for more information"
   },
   {
     "id": "api.config.update_config.clear_siteurl.app_error",
@@ -1867,7 +1867,7 @@
   },
   {
     "id": "api.email_batching.send_batched_email_notification.button",
-    "translation": "Open Mattermost"
+    "translation": "Open RemoTalk"
   },
   {
     "id": "api.email_batching.send_batched_email_notification.messageButton",
@@ -2274,7 +2274,7 @@
   },
   {
     "id": "api.license.request-trial.bad-request.terms-not-accepted",
-    "translation": "You must accept the Mattermost Software Evaluation Agreement and Privacy Policy to request a license."
+    "translation": "You must accept the RemoTalk Software Evaluation Agreement and Privacy Policy to request a license."
   },
   {
     "id": "api.license.request-trial.can-start-trial.error",
@@ -2282,7 +2282,7 @@
   },
   {
     "id": "api.license.request-trial.can-start-trial.not-allowed",
-    "translation": "Failed to apply new trial license. You have previously applied a trial license to this Mattermost instance.. If you would like to extend your trial period please [contact our sales team](https://mattermost.com/contact-us/)."
+    "translation": "Failed to apply new trial license. You have previously applied a trial license to this RemoTalk instance.. If you would like to extend your trial period please [contact our sales team](https://mattermost.com/contact-us/)."
   },
   {
     "id": "api.license.request_trial_license.app_error",
@@ -2840,7 +2840,7 @@
   },
   {
     "id": "api.server.cws.disabled",
-    "translation": "Interactions with the Mattermost Customer Portal have been disabled by the system admin."
+    "translation": "Interactions with the RemoTalk Customer Portal have been disabled by the system admin."
   },
   {
     "id": "api.server.cws.health_check.app_error",
@@ -2848,7 +2848,7 @@
   },
   {
     "id": "api.server.cws.needs_enterprise_edition",
-    "translation": "Service only available in Mattermost Enterprise edition"
+    "translation": "Service only available in RemoTalk Enterprise edition"
   },
   {
     "id": "api.server.cws.subscribe_to_newsletter.app_error",
@@ -2920,7 +2920,7 @@
   },
   {
     "id": "api.slackimport.slack_add_channels.merge",
-    "translation": "The Slack channel {{.DisplayName}} already exists as an active Mattermost channel. Both channels have been merged.\r\n"
+    "translation": "The Slack channel {{.DisplayName}} already exists as an active RemoTalk channel. Both channels have been merged.\r\n"
   },
   {
     "id": "api.slackimport.slack_add_users.created",
@@ -2932,11 +2932,11 @@
   },
   {
     "id": "api.slackimport.slack_add_users.merge_existing",
-    "translation": "Slack user merged with an existing Mattermost user with matching email {{.Email}} and username {{.Username}}.\r\n"
+    "translation": "Slack user merged with an existing RemoTalk user with matching email {{.Email}} and username {{.Username}}.\r\n"
   },
   {
     "id": "api.slackimport.slack_add_users.merge_existing_failed",
-    "translation": "Slack user merged with an existing Mattermost user with matching email {{.Email}} and username {{.Username}}, but was unable to add the user to their team.\r\n"
+    "translation": "Slack user merged with an existing RemoTalk user with matching email {{.Email}} and username {{.Username}}, but was unable to add the user to their team.\r\n"
   },
   {
     "id": "api.slackimport.slack_add_users.missing_email_address",
@@ -2948,7 +2948,7 @@
   },
   {
     "id": "api.slackimport.slack_import.log",
-    "translation": "Mattermost Slack Import Log\r\n"
+    "translation": "RemoTalk Slack Import Log\r\n"
   },
   {
     "id": "api.slackimport.slack_import.note1",
@@ -3288,11 +3288,11 @@
   },
   {
     "id": "api.templates.cloud_welcome_email.button",
-    "translation": "Open Mattermost"
+    "translation": "Open RemoTalk"
   },
   {
     "id": "api.templates.cloud_welcome_email.download_mm_info",
-    "translation": "Download the Mattermost App"
+    "translation": "Download the RemoTalk App"
   },
   {
     "id": "api.templates.cloud_welcome_email.info",
@@ -3392,7 +3392,7 @@
   },
   {
     "id": "api.templates.email_footer_v2",
-    "translation": "© 2022 Mattermost, Inc. 530 Lytton Avenue, Second floor, Palo Alto, CA, 94301"
+    "translation": ""
   },
   {
     "id": "api.templates.email_info1",
@@ -3424,7 +3424,7 @@
   },
   {
     "id": "api.templates.invite_body.subTitle",
-    "translation": "Start collaborating with your team on Mattermost"
+    "translation": "Start collaborating with your team on RemoTalk"
   },
   {
     "id": "api.templates.invite_body.title",
@@ -3436,7 +3436,7 @@
   },
   {
     "id": "api.templates.invite_body_footer.info",
-    "translation": "Mattermost is a flexible, open source messaging platform that enables secure team collaboration."
+    "translation": "RemoTalk is a flexible, open source messaging platform that enables secure team collaboration."
   },
   {
     "id": "api.templates.invite_body_footer.learn_more",
@@ -3444,7 +3444,7 @@
   },
   {
     "id": "api.templates.invite_body_footer.title",
-    "translation": "What is Mattermost?"
+    "translation": "What is RemoTalk?"
   },
   {
     "id": "api.templates.invite_body_guest.subTitle",
@@ -3516,11 +3516,11 @@
   },
   {
     "id": "api.templates.license_up_for_renewal_subtitle",
-    "translation": "{{.UserName}}, your subscription is set to expire in {{.Days}} days. We hope you’re experiencing the flexible, secure team collaboration that Mattermost enables. Renew soon to ensure your team can keep enjoying these benefits."
+    "translation": "{{.UserName}}, your subscription is set to expire in {{.Days}} days. We hope you’re experiencing the flexible, secure team collaboration that RemoTalk enables. Renew soon to ensure your team can keep enjoying these benefits."
   },
   {
     "id": "api.templates.license_up_for_renewal_title",
-    "translation": "Your Mattermost subscription is up for renewal"
+    "translation": "Your RemoTalk subscription is up for renewal"
   },
   {
     "id": "api.templates.mfa_activated_body.info",
@@ -3556,7 +3556,7 @@
   },
   {
     "id": "api.templates.post_body.button",
-    "translation": "Reply in Mattermost"
+    "translation": "Reply in RemoTalk"
   },
   {
     "id": "api.templates.questions_footer.info",
@@ -3572,7 +3572,7 @@
   },
   {
     "id": "api.templates.remove_expired_license.subject",
-    "translation": "Mattermost Enterprise license has been disabled."
+    "translation": "RemoTalk Enterprise license has been disabled."
   },
   {
     "id": "api.templates.reset_body.button",
@@ -3640,7 +3640,7 @@
   },
   {
     "id": "api.templates.verify_body.info",
-    "translation": "This email address was used to create an account with Mattermost."
+    "translation": "This email address was used to create an account with RemoTalk."
   },
   {
     "id": "api.templates.verify_body.info1",
@@ -3684,7 +3684,7 @@
   },
   {
     "id": "api.templates.welcome_body.info",
-    "translation": "This email address was used to create an account with Mattermost."
+    "translation": "This email address was used to create an account with RemoTalk."
   },
   {
     "id": "api.templates.welcome_body.info1",
@@ -3724,43 +3724,43 @@
   },
   {
     "id": "api.upgrade_to_enterprise.already-done.app_error",
-    "translation": "You have already upgraded to Mattermost Enterprise Edition. Please restart the server to finish the upgrade."
+    "translation": "You have already upgraded to RemoTalk Enterprise Edition. Please restart the server to finish the upgrade."
   },
   {
     "id": "api.upgrade_to_enterprise.already-enterprise.app_error",
-    "translation": "You cannot upgrade because you are already running Mattermost Enterprise Edition."
+    "translation": "You cannot upgrade because you are already running RemoTalk Enterprise Edition."
   },
   {
     "id": "api.upgrade_to_enterprise.app_error",
-    "translation": "An upgrade to Mattermost Enterprise Edition is already running."
+    "translation": "An upgrade to RemoTalk Enterprise Edition is already running."
   },
   {
     "id": "api.upgrade_to_enterprise.generic_error.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition."
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition."
   },
   {
     "id": "api.upgrade_to_enterprise.invalid-permission.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition. The Mattermost system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where Mattermost is installed:\n\n```\nchmod +w \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade Mattermost again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchmod -w \"{{.Path}}\"\n```"
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition. The RemoTalk system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where RemoTalk is installed:\n\n```\nchmod +w \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade RemoTalk again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchmod -w \"{{.Path}}\"\n```"
   },
   {
     "id": "api.upgrade_to_enterprise.invalid-user-and-permission.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition. The Mattermost system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where Mattermost is installed:\n\n```\nchown {{.MattermostUsername}} \"{{.Path}}\"\nchmod +w \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade Mattermost again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchown {{.FileUsername}} \"{{.Path}}\"\nchmod -w \"{{.Path}}\"\n```"
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition. The RemoTalk system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where RemoTalk is installed:\n\n```\nchown {{.MattermostUsername}} \"{{.Path}}\"\nchmod +w \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade RemoTalk again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchown {{.FileUsername}} \"{{.Path}}\"\nchmod -w \"{{.Path}}\"\n```"
   },
   {
     "id": "api.upgrade_to_enterprise.invalid-user.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition. The Mattermost system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where Mattermost is installed:\n\n```\nchown {{.MattermostUsername}} \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade Mattermost again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchown {{.FileUsername}} \"{{.Path}}\"\n```"
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition. The RemoTalk system user {{.MattermostUsername}} does not have write access to the necessary binary file. A system administrator can update the file permissions by executing the following command on the server where RemoTalk is installed:\n\n```\nchown {{.MattermostUsername}} \"{{.Path}}\"\n```\n\nAfter changing the file permissions, try to upgrade RemoTalk again. When you have upgraded and restarted, remember to restore the original binary file permissions:\n\n```\nchown {{.FileUsername}} \"{{.Path}}\"\n```"
   },
   {
     "id": "api.upgrade_to_enterprise.system_not_supported.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition. This feature will only work on Linux systems with x86-64 architecture."
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition. This feature will only work on Linux systems with x86-64 architecture."
   },
   {
     "id": "api.upgrade_to_enterprise_status.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition."
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition."
   },
   {
     "id": "api.upgrade_to_enterprise_status.signature.app_error",
-    "translation": "Mattermost was unable to upgrade to Enterprise Edition. The digital signature of the downloaded binary file could not be verified."
+    "translation": "RemoTalk was unable to upgrade to Enterprise Edition. The digital signature of the downloaded binary file could not be verified."
   },
   {
     "id": "api.upload.create.upload_channel_not_shared_with_remote.app_error",
@@ -4532,7 +4532,7 @@
   },
   {
     "id": "app.channel.elasticsearch_channel_index.notify_admin.message",
-    "translation": "Your Elasticsearch channel index schema is out of date. It is recommended to regenerate your channel index.\nClick the `Rebuild Channels Index` button in [Elasticsearch section in System Console]({{.ElasticsearchSection}}) to fix the issue.\nSee Mattermost changelog for more information."
+    "translation": "Your Elasticsearch channel index schema is out of date. It is recommended to regenerate your channel index.\nClick the `Rebuild Channels Index` button in [Elasticsearch section in System Console]({{.ElasticsearchSection}}) to fix the issue.\nSee RemoTalk changelog for more information."
   },
   {
     "id": "app.channel.get.existing.app_error",
@@ -5836,7 +5836,7 @@
   },
   {
     "id": "app.notification.footer.infoLogin",
-    "translation": "Login to Mattermost"
+    "translation": "Login to RemoTalk"
   },
   {
     "id": "app.notification.footer.title",
@@ -7788,7 +7788,7 @@
   },
   {
     "id": "ent.ldap.do_login.user_filtered.app_error",
-    "translation": "Your AD/LDAP account does not have permission to use this Mattermost server. Please ask your System Administrator to check the AD/LDAP user filter."
+    "translation": "Your AD/LDAP account does not have permission to use this RemoTalk server. Please ask your System Administrator to check the AD/LDAP user filter."
   },
   {
     "id": "ent.ldap.do_login.user_not_registered.app_error",
@@ -7824,7 +7824,7 @@
   },
   {
     "id": "ent.ldap.syncronize.search_failure.app_error",
-    "translation": "Failed to search users in AD/LDAP. Test if the Mattermost server can connect to your AD/LDAP server and try again."
+    "translation": "Failed to search users in AD/LDAP. Test if the RemoTalk server can connect to your AD/LDAP server and try again."
   },
   {
     "id": "ent.ldap.syncronize.search_failure_size_exceeded.app_error",
@@ -7956,7 +7956,7 @@
   },
   {
     "id": "ent.migration.migratetosaml.username_already_used_by_other_user",
-    "translation": "Username already used by another Mattermost user."
+    "translation": "Username already used by another RemoTalk user."
   },
   {
     "id": "ent.outgoing_oauth_connections.authenticate.app_error",
@@ -8168,7 +8168,7 @@
   },
   {
     "id": "mattermost.bulletin.subject",
-    "translation": "Mattermost Security Bulletin"
+    "translation": "RemoTalk Security Bulletin"
   },
   {
     "id": "mfa.activate.app_error",
@@ -9344,7 +9344,7 @@
   },
   {
     "id": "model.oauth.is_valid.mattermost_app_id.app_error",
-    "translation": "The maximum length of MattermostAppID is 32 characters."
+    "translation": "The maximum length of RemoTalkAppID is 32 characters."
   },
   {
     "id": "model.oauth.is_valid.name.app_error",
@@ -9908,7 +9908,7 @@
   },
   {
     "id": "oauth.gitlab.tos.error",
-    "translation": "GitLab's Terms of Service have updated. Please go to {{.URL}} to accept them and then try logging into Mattermost again."
+    "translation": "GitLab's Terms of Service have updated. Please go to {{.URL}} to accept them and then try logging into RemoTalk again."
   },
   {
     "id": "plugin.api.get_users_in_channel",
@@ -10072,7 +10072,7 @@
   },
   {
     "id": "web.error.unsupported_browser.download_app_or_upgrade_browser",
-    "translation": "Download the Mattermost app or use a supported browser for a better experience."
+    "translation": "Download the RemoTalk app or use a supported browser for a better experience."
   },
   {
     "id": "web.error.unsupported_browser.download_the_app",
@@ -10116,11 +10116,11 @@
   },
   {
     "id": "web.error.unsupported_browser.no_longer_support",
-    "translation": "This browser is no longer supported by Mattermost"
+    "translation": "This browser is no longer supported by RemoTalk"
   },
   {
     "id": "web.error.unsupported_browser.no_longer_support_version",
-    "translation": "This version of your browser is no longer supported by Mattermost"
+    "translation": "This version of your browser is no longer supported by RemoTalk"
   },
   {
     "id": "web.error.unsupported_browser.open_system_browser.edge",

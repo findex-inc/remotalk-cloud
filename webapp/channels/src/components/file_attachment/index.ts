@@ -37,7 +37,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
         actions: bindActionCreators({
             openModal,
 
-	    // For RemoTalk plugin
+            // For RemoTalk plugin
             getSavedFileInCurrentChannel,
         }, dispatch),
     };

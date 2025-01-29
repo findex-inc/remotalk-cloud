@@ -11,6 +11,7 @@ import type {FileInfo} from '@mattermost/types/files';
 import {getFileThumbnailUrl, getFileUrl} from 'mattermost-redux/utils/file_utils';
 
 import GetPublicModal from 'components/get_public_link_modal';
+import SomeIcon from 'components/widgets/icons/check_circle_icon';
 import Menu from 'components/widgets/menu/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
 import WithTooltip from 'components/with_tooltip';
@@ -63,6 +64,7 @@ export default function FileAttachment(props: Props) {
     const [loadFilesCalled, setLoadFilesCalled] = useState(false);
     const [keepOpen, setKeepOpen] = useState(false);
     const [openUp, setOpenUp] = useState(false);
+    const [savedInAlbum, setSavedInAlbum] = useState(false);
 
     const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -114,6 +116,16 @@ export default function FileAttachment(props: Props) {
             setLoaded(getFileType(props.fileInfo.extension) !== FileTypes.IMAGE && !(props.enableSVGs && props.fileInfo.extension === FileTypes.SVG));
         }
     }, [props.fileInfo.extension, props.fileInfo.id, props.enableSVGs]);
+
+    useEffect(() => {
+        if (props.fileInfo.id && props.channelAlbumEnabled) {
+            const fn = async () => {
+                const {data} = await props.actions.getSavedFileInCurrentChannel(props.fileInfo.id);
+                setSavedInAlbum(Boolean(data));
+            };
+            fn();
+        }
+    }, [props.actions, props.channelAlbumEnabled, props.fileInfo.id]);
 
     const onAttachmentClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (props.fileInfo.archived) {
@@ -377,6 +389,13 @@ export default function FileAttachment(props: Props) {
                     {fileActions}
                     {filenameOverlay}
                 </div>
+                {
+                    savedInAlbum && (
+                        <div style={{position: 'relative', height: '100%'}}>
+                            <SomeIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
+                        </div>
+                    )
+                }
             </div>
         </WithTooltip>
     );

@@ -6,10 +6,11 @@ import type {ConnectedProps} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
+import {getSavedFileInCurrentChannel} from 'mattermost-redux/actions/integrations';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {openModal} from 'actions/views/modals';
-import {getFilesDropdownPluginMenuItems} from 'selectors/plugins';
+import {currentChannelAlbumEnabled, getFilesDropdownPluginMenuItems} from 'selectors/plugins';
 
 import {canDownloadFiles} from 'utils/file_utils';
 
@@ -25,6 +26,9 @@ function mapStateToProps(state: GlobalState) {
         enableSVGs: config.EnableSVGs === 'true',
         enablePublicLink: config.EnablePublicLink === 'true',
         pluginMenuItems: getFilesDropdownPluginMenuItems(state),
+
+        // For RemoTalk plugin
+        channelAlbumEnabled: currentChannelAlbumEnabled(state),
     };
 }
 
@@ -32,6 +36,9 @@ function mapDispatchToProps(dispatch: Dispatch) {
     return {
         actions: bindActionCreators({
             openModal,
+
+	    // For RemoTalk plugin
+            getSavedFileInCurrentChannel,
         }, dispatch),
     };
 }

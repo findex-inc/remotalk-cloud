@@ -517,6 +517,9 @@ export function submitInteractiveDialog(submission: DialogSubmission): ActionFun
 
 // For RemoTalk plugin
 
+const remotalkPluginId = 'jp.co.findex.remotalk-plugin';
+const toRTAction = (a: string) => `${remotalkPluginId}.${a}`;
+
 export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
     [key: string]: {
         user_id: string;
@@ -536,7 +539,7 @@ export function getStaffSummaries(userIds: string[]): ActionFuncAsync<{
                 data[id] = {user_id: id};
             }
             dispatch({
-                type: 'RECEIVED_STAFF_SUMMARIES',
+                type: toRTAction('RECEIVED_STAFF_SUMMARIES'),
                 data,
             });
             return {data};
@@ -555,7 +558,7 @@ export function setStaffFilterParams(params: {
     profession_id?: number | undefined;
 }) {
     return {
-        type: 'TENANT_FILTER_APPLIED',
+        type: toRTAction('TENANT_FILTER_APPLIED'),
         data: params,
     };
 }
@@ -568,7 +571,7 @@ export function searchFilteredUserIds(params: {
     return async (dispatch, getState) => {
         if (Object.values(params).every((x) => !x)) {
             dispatch({
-                type: 'FILTERED_USER_IDS_CHANGED',
+                type: toRTAction('FILTERED_USER_IDS_CHANGED'),
                 data: [],
             });
             return {data: []};
@@ -576,13 +579,13 @@ export function searchFilteredUserIds(params: {
         try {
             const data = await Client4.searchFilteredUserIds(params);
             dispatch({
-                type: 'FILTERED_USER_IDS_RECEIVED',
+                type: toRTAction('FILTERED_USER_IDS_RECEIVED'),
                 data,
             });
             return {data};
         } catch (error) {
             dispatch({
-                type: 'FILTERED_USER_IDS_CHANGED',
+                type: toRTAction('FILTERED_USER_IDS_CHANGED'),
                 data: [],
             });
             forceLogoutIfNecessary(error, dispatch, getState);
@@ -624,7 +627,7 @@ export function updateMyFindexUserInfo(user: UserProfile, patch: {
             data.email = patch.email;
         }
         if (typeof patch.phone !== 'undefined') {
-            actions.push({type: 'UPDATED_STAFF_PHONE', data: patch.phone});
+            actions.push({type: toRTAction('UPDATED_STAFF_PHONE'), data: patch.phone});
         }
         actions.push({type: UserTypes.RECEIVED_ME, data});
         dispatch(batchActions(actions));
@@ -652,7 +655,7 @@ export function updateBelongingDepartments(staffId: number, ids: number[]): Acti
 
         dispatch(batchActions([
             {type: UserTypes.UPDATE_ME_SUCCESS},
-            {type: 'UPDATED_BELONGING_DEPARTMENTS', data},
+            {type: toRTAction('UPDATED_BELONGING_DEPARTMENTS'), data},
         ]));
 
         return {data: true};
@@ -678,9 +681,26 @@ export function updateAssignedProfessions(staffId: number, ids: number[]): Actio
 
         dispatch(batchActions([
             {type: UserTypes.UPDATE_ME_SUCCESS},
-            {type: 'UPDATED_ASSIGNED_PROFESSIONS', data},
+            {type: toRTAction('UPDATED_ASSIGNED_PROFESSIONS'), data},
         ]));
 
         return {data: true};
+    };
+}
+
+export function getSavedFileInCurrentChannel(fileId: string): ActionFuncAsync {
+    return async (dispatch, getState) => {
+        const state = getState();
+        const teamId = getCurrentTeamId(state);
+        const channelId = getCurrentChannelId(state);
+
+        try {
+            const data = await Client4.getAlbumSavedFileInfo(teamId, channelId, fileId);
+            dispatch({type: toRTAction('RECEIVED_SAVED_FILES'), data: [data]});
+            return {data: Boolean(data)};
+        } catch (error) {
+            dispatch({type: toRTAction('ERROR_RECEIVE_SAVED_FILES'), error});
+            return {error};
+        }
     };
 }

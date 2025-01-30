@@ -16,6 +16,7 @@ import type {ActionResult} from 'mattermost-redux/types/actions';
 import {getFileMiniPreviewUrl} from 'mattermost-redux/utils/file_utils';
 
 import LoadingImagePreview from 'components/loading_image_preview';
+import CheckCircleIcon from 'components/widgets/icons/check_circle_icon';
 import WithTooltip from 'components/with_tooltip';
 
 import {localizeMessage, copyToClipboard} from 'utils/utils';
@@ -91,6 +92,11 @@ export type Props = {
     * Prevents display of utility buttons when image in a location that makes them inappropriate
     */
     hideUtilities?: boolean;
+
+    /*
+    * For RemoTalk plugin
+    */
+    savedInAlbum?: boolean;
 }
 
 type State = {
@@ -440,6 +446,13 @@ export default class SizeAwareImage extends React.PureComponent<Props, State> {
                     style={{display: shouldShowImg ? 'inline-block' : 'none'}}
                 >
                     {this.renderImageWithContainerIfNeeded()}
+                    {
+                        this.props.savedInAlbum && ( // For RemoTalk plugin
+                            <div style={{position: 'relative', height: '100%'}}>
+                                <CheckCircleIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
+                            </div>
+                        )
+                    }
                 </div>
             </React.Fragment>
         );

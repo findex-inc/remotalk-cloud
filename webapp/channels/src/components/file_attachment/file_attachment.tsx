@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import classNames from 'classnames';
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState, useEffect, useMemo} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 
 import {ArchiveOutlineIcon} from '@mattermost/compass-icons/components';
@@ -11,7 +11,7 @@ import type {FileInfo} from '@mattermost/types/files';
 import {getFileThumbnailUrl, getFileUrl} from 'mattermost-redux/utils/file_utils';
 
 import GetPublicModal from 'components/get_public_link_modal';
-import SomeIcon from 'components/widgets/icons/check_circle_icon';
+import CheckCircleIcon from 'components/widgets/icons/check_circle_icon';
 import Menu from 'components/widgets/menu/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
 import WithTooltip from 'components/with_tooltip';
@@ -64,7 +64,6 @@ export default function FileAttachment(props: Props) {
     const [loadFilesCalled, setLoadFilesCalled] = useState(false);
     const [keepOpen, setKeepOpen] = useState(false);
     const [openUp, setOpenUp] = useState(false);
-    const [savedInAlbum, setSavedInAlbum] = useState(false);
 
     const buttonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -117,15 +116,14 @@ export default function FileAttachment(props: Props) {
         }
     }, [props.fileInfo.extension, props.fileInfo.id, props.enableSVGs]);
 
+    // For RemoTalk plugin
     useEffect(() => {
         if (props.fileInfo.id && props.channelAlbumEnabled) {
-            const fn = async () => {
-                const {data} = await props.actions.getSavedFileInCurrentChannel(props.fileInfo.id);
-                setSavedInAlbum(Boolean(data));
-            };
-            fn();
+            props.actions.getSavedFileInCurrentChannel(props.fileInfo.id);
         }
     }, [props.actions, props.channelAlbumEnabled, props.fileInfo.id]);
+
+    const savedInAlbum = useMemo(() => Boolean(props.savedFilesMap[props.fileInfo.id]), [props.fileInfo.id, props.savedFilesMap]);
 
     const onAttachmentClick = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (props.fileInfo.archived) {
@@ -390,9 +388,9 @@ export default function FileAttachment(props: Props) {
                     {filenameOverlay}
                 </div>
                 {
-                    savedInAlbum && (
+                    savedInAlbum && ( // For RemoTalk plugin
                         <div style={{position: 'relative', height: '100%'}}>
-                            <SomeIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
+                            <CheckCircleIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
                         </div>
                     )
                 }

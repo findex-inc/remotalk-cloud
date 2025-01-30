@@ -7,10 +7,12 @@ import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
 import {getFilePublicLink} from 'mattermost-redux/actions/files';
+import {getSavedFileInCurrentChannel} from 'mattermost-redux/actions/integrations';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {toggleEmbedVisibility} from 'actions/post_actions';
 import {openModal} from 'actions/views/modals';
+import {currentChannelAlbumEnabled, getSavedFilesMap} from 'selectors/plugins';
 import {getIsRhsOpen} from 'selectors/rhs';
 
 import SingleImageView from 'components/single_image_view/single_image_view';
@@ -24,6 +26,10 @@ function mapStateToProps(state: GlobalState) {
     return {
         isRhsOpen,
         enablePublicLink: config.EnablePublicLink === 'true',
+
+        // For RemoTalk plugin
+        channelAlbumEnabled: currentChannelAlbumEnabled(state),
+        savedFilesMap: getSavedFilesMap(state),
     };
 }
 
@@ -33,6 +39,9 @@ function mapDispatchToProps(dispatch: Dispatch) {
             toggleEmbedVisibility,
             openModal,
             getFilePublicLink,
+
+            // For RemoTalk plugin
+            getSavedFileInCurrentChannel,
         }, dispatch),
     };
 }

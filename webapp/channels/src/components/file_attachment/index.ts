@@ -10,7 +10,7 @@ import {getSavedFileInCurrentChannel} from 'mattermost-redux/actions/integration
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {openModal} from 'actions/views/modals';
-import {currentChannelAlbumEnabled, getFilesDropdownPluginMenuItems} from 'selectors/plugins';
+import {currentChannelAlbumEnabled, getFilesDropdownPluginMenuItems, getSavedFilesMap} from 'selectors/plugins';
 
 import {canDownloadFiles} from 'utils/file_utils';
 
@@ -29,6 +29,7 @@ function mapStateToProps(state: GlobalState) {
 
         // For RemoTalk plugin
         channelAlbumEnabled: currentChannelAlbumEnabled(state),
+        savedFilesMap: getSavedFilesMap(state),
     };
 }
 

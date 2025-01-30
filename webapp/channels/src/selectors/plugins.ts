@@ -438,3 +438,15 @@ export const currentChannelAlbumEnabled = createSelector(
         return Boolean(channelAlbums && channelAlbums[id]);
     },
 );
+
+export const getSavedFilesMap = createSelector(
+    'getSavedFilesMap',
+    getRemoTalkPluginState,
+    (rtState) => {
+        const files = rtState?.albums?.files;
+        if (!files || typeof files !== 'object') {
+            return {};
+        }
+        return files as {[key: string]: unknown};
+    },
+);

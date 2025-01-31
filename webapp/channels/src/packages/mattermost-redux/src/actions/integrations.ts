@@ -700,6 +700,7 @@ export function getSavedFileInCurrentChannel(fileId: string): ActionFuncAsync {
             return {data: Boolean(data)};
         } catch (error) {
             dispatch({type: toRTAction('ERROR_RECEIVE_SAVED_FILES'), error});
+            dispatch({type: toRTAction('DELETED_FILES'), data: [{file_id: fileId}]});
             return {error};
         }
     };

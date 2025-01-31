@@ -3,7 +3,6 @@
 
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import type {History} from 'history';
 import React, {lazy} from 'react';
 import {Route, Switch, Redirect, Link} from 'react-router-dom';
 import type {RouteComponentProps} from 'react-router-dom';

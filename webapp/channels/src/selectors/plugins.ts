@@ -6,6 +6,7 @@ import type {AppBinding} from '@mattermost/types/apps';
 import {Preferences} from 'mattermost-redux/constants';
 import {createSelector} from 'mattermost-redux/selectors/create_selector';
 import {appBarEnabled, getAppBarAppBindings} from 'mattermost-redux/selectors/entities/apps';
+import {getCurrentChannelId} from 'mattermost-redux/selectors/entities/channels';
 import {get} from 'mattermost-redux/selectors/entities/preferences';
 import {getCurrentUserRoles} from 'mattermost-redux/selectors/entities/users';
 import {createShallowSelector} from 'mattermost-redux/utils/helpers';
@@ -426,4 +427,26 @@ export const getMyAuthId = createSelector(
     'getMyAuthId',
     getMyInfo,
     (info) => info?.authId ?? 0,
+);
+
+export const currentChannelAlbumEnabled = createSelector(
+    'currentChannelAlbumEnabled',
+    getCurrentChannelId,
+    getRemoTalkPluginState,
+    (id, rtState) => {
+        const channelAlbums = rtState?.albums?.channels;
+        return Boolean(channelAlbums && channelAlbums[id]);
+    },
+);
+
+export const getSavedFilesMap = createSelector(
+    'getSavedFilesMap',
+    getRemoTalkPluginState,
+    (rtState) => {
+        const files = rtState?.albums?.files;
+        if (!files || typeof files !== 'object') {
+            return {};
+        }
+        return files as {[key: string]: unknown};
+    },
 );

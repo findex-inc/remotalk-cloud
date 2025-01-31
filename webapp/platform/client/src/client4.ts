@@ -4326,13 +4326,6 @@ export default class Client4 {
     };
 
     // For RemoTalk plugin
-    getRemoTalkPluginConfig = () => {
-        return this.doFetch<{[key: string]: any}>(
-            `${this.getRemoTalkV1Route()}/config`, {method: 'get'},
-        );
-    };
-
-    // For RemoTalk plugin
     searchFilteredUserIds = (params: {hospital_id?: number; department_id?: number; profession_id?: number}) => {
         return this.doFetch<string[]>(
             `${this.getRemoTalkV1Route()}/staffs/search`,
@@ -4364,6 +4357,7 @@ export default class Client4 {
         });
     };
 
+    // For RemoTalk plugin
     updateBelongingDepartments = (relations: Array<{staff_id: number; department_id: number}>) => {
         return this.doFetch<Array<{staff_id: number; department_id: number}>>(`${this.getRemoTalkV1Route()}/staffs/me/departments`, {
             method: 'post',
@@ -4371,10 +4365,18 @@ export default class Client4 {
         });
     };
 
+    // For RemoTalk plugin
     updateAssignedProfessions = (relations: Array<{staff_id: number; profession_id: number}>) => {
         return this.doFetch<Array<{staff_id: number; profession_id: number}>>(`${this.getRemoTalkV1Route()}/staffs/me/professions`, {
             method: 'post',
             body: JSON.stringify(relations),
+        });
+    };
+
+    // For RemoTalk plugin
+    getAlbumSavedFileInfo = (teamId: string, channelId: string, fileId: string) => {
+        return this.doFetch<{file_id: string; delete_at: number}>(`${this.getRemoTalkV1Route()}/albums/${teamId}/channels/${channelId}/files/${fileId}/info`, {
+            method: 'get',
         });
     };
 }

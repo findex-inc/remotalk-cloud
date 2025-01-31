@@ -59,6 +59,15 @@ export default class SingleImageView extends React.PureComponent<Props, State> {
 
     componentDidMount() {
         this.mounted = true;
+
+        // For RemoTalk plugin
+        if (this.props.fileInfo.id && this.props.channelAlbumEnabled) {
+            this.props.actions.getSavedFileInCurrentChannel(this.props.fileInfo.id);
+        }
+    }
+
+    getFileSavedInAlbum() {
+        return Boolean(this.props.savedFilesMap[this.props.fileInfo.id]);
     }
 
     static getDerivedStateFromProps(props: Props, state: State) {
@@ -241,6 +250,7 @@ export default class SingleImageView extends React.PureComponent<Props, State> {
                                     handleSmallImageContainer={true}
                                     enablePublicLink={this.props.enablePublicLink}
                                     getFilePublicLink={this.getFilePublicLink}
+                                    savedInAlbum={this.getFileSavedInAlbum()}
                                 />
                             </div>
                         </div>

@@ -120,10 +120,11 @@ func GenerateClientConfig(c *model.Config, telemetryID string, license *model.Li
 	props["BannerColor"] = ""
 	props["BannerTextColor"] = ""
 	props["AllowBannerDismissal"] = "false"
-	props["EnableThemeSelection"] = "true"
-	props["DefaultTheme"] = ""
-	props["AllowCustomThemes"] = "true"
-	props["AllowedThemes"] = ""
+	// For RemoTalk plugin
+	props["EnableThemeSelection"] = strconv.FormatBool(*c.ThemeSettings.EnableThemeSelection)
+	props["DefaultTheme"] = *c.ThemeSettings.DefaultTheme
+	props["AllowCustomThemes"] = strconv.FormatBool(*c.ThemeSettings.AllowCustomThemes)
+	props["AllowedThemes"] = strings.Join(c.ThemeSettings.AllowedThemes, ",")
 	props["DataRetentionEnableMessageDeletion"] = "false"
 	props["DataRetentionMessageRetentionHours"] = "0"
 	props["DataRetentionEnableFileDeletion"] = "false"

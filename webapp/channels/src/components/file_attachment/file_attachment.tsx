@@ -390,7 +390,7 @@ export default function FileAttachment(props: Props) {
                 {
                     savedInAlbum && ( // For RemoTalk plugin
                         <div style={{position: 'relative', height: '100%'}}>
-                            <CheckCircleIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
+                            <CheckCircleIcon style={{position: 'absolute', bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
                         </div>
                     )
                 }

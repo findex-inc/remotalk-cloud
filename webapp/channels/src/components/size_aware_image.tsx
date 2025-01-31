@@ -452,7 +452,7 @@ export default class SizeAwareImage extends React.PureComponent<Props, State> {
                     {
                         this.props.savedInAlbum && ( // For RemoTalk plugin
                             <div style={{position: 'relative', height: '100%'}}>
-                                <CheckCircleIcon style={{position: 'absolute', zIndex: 1000, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
+                                <CheckCircleIcon style={{position: 'absolute', zIndex: 4, bottom: 0, right: 0, fill: 'var(--sys-link-color)'}}/>
                             </div>
                         )
                     }

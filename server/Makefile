@@ -164,7 +164,7 @@ PLUGIN_PACKAGES += mattermost-plugin-metrics-v0.5.3
 
 # Findex Plugins Packages
 FDX_PLUGIN_PACKAGES ?= $(FDX_PLUGIN_PACKAGES:)
-FDX_PLUGIN_PACKAGES += jp.co.findex.remotalk-plugin-0.6.2
+FDX_PLUGIN_PACKAGES += jp.co.findex.remotalk-plugin-0.6.3
 
 EE_PACKAGES=$(shell $(GO) list $(BUILD_ENTERPRISE_DIR)/...)
 
